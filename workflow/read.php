@@ -39,7 +39,8 @@
 
             $workflow_item = array(
                 'workflow_id' => $workflow_id,
-                'time' => $history->readLastUpdateDate($workflow_id),
+                // 'time' => $history->readLastUpdateDate($workflow_id),
+                'time' => $time,
                 'company_name' => $company_name,
                 'status' => $status,
                 'urgent' => $urgent,
