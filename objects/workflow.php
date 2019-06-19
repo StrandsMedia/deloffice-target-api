@@ -70,13 +70,28 @@
 
         // Sales & Delivery Workflow
 
-        function read() {
-            $query = "SELECT b.cust_id, b.company_name, a.workflow_id, a.time, a.status, a.urgent, a.cust_id, a.orderNo, a.purchase, a.invoiceNo, a.vehicleNo, a.sessionID FROM " . $this->table_name . " a, del_cust b WHERE b.cust_id = a.cust_id AND a.status <> 0 AND a.status BETWEEN :range1 AND :range2 ORDER BY a.time DESC";
+        function read($case) {
+            $condition = "";
+            switch (+$case) {
+                case 1:
+                    $condition = " AND a.status BETWEEN 1 AND 3 ";
+                    break;
+                case 2:
+                    $condition = " AND a.status IN (3, 25, 26) ";
+                    break;
+                case 3:
+                    $condition = " AND a.status IN (26, 7) ";
+                    break;
+                case 4:
+                    $condition = " AND a.status BETWEEN 5 AND 7 ";
+                    break;
+                case 5:
+                    $condition = " AND a.status IN (6, 9, 8) ";
+                    break;
+            }
+            $query = "SELECT b.cust_id, b.company_name, a.workflow_id, a.time, a.status, a.urgent, a.cust_id, a.orderNo, a.purchase, a.invoiceNo, a.vehicleNo, a.sessionID, a.invoice_id FROM {$this->table_name} a, del_cust b WHERE b.cust_id = a.cust_id AND a.status <> 0 {$condition} ORDER BY a.time DESC";
 
             $stmt = $this->conn->prepare($query);
-
-            $stmt->bindParam(':range1', $this->range1, PDO::PARAM_STR);
-            $stmt->bindParam(':range2', $this->range2, PDO::PARAM_STR);
 
             $stmt->execute();
 

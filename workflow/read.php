@@ -24,10 +24,9 @@
 
     $data = json_decode(file_get_contents('php://input'));
 
-    $workflow->range1 = isset($data->range1) ? $data->range1 : die();
-    $workflow->range2 = isset($data->range2) ? $data->range2 : die();
+    $case = isset($data->case) ? +$data->case : die();
 
-    $stmt = $workflow->read();
+    $stmt = $workflow->read($case);
     $num = $stmt->rowCount();
 
     if ($num > 0) {
