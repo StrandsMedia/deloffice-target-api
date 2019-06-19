@@ -28,9 +28,44 @@
         public $poNumber;
         public $notes;
         public $DocTypeID;
+        public $invRef;
 
         public function __construct($db) {
             $this->conn = $db;
+        }
+
+        public function invoiceGen($input, $pad_len = 7, $prefix = null) {
+            if ($pad_len <= strlen($input))
+                trigger_error('<strong>$pad_len</strong> cannot be less than or equal to the length of <strong>$input</strong> to generate invoice number', E_USER_ERROR);
+        
+            if (is_string($prefix))
+                return sprintf("%s%s", $prefix, str_pad($input, $pad_len, "0", STR_PAD_LEFT));
+        
+            return str_pad($input, $pad_len, "0", STR_PAD_LEFT);
+        }
+
+        function createProforma() {
+            $query = "INSERT INTO
+                        {$this->table_name}
+                    SET
+                        company_name = :company_name,
+                        customerCode = :customerCode,
+                        user = :user,
+                        workflow_id = :workflow_id,
+                        InvStatus = 1;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(':company_name', $this->company_name);
+            $stmt->bindParam(':customerCode', $this->customerCode);
+            $stmt->bindParam(':user', $this->user);
+            $stmt->bindParam(':workflow_id', $this->workflow_id);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
         function createInvoice() {
@@ -131,6 +166,40 @@
             $stmt->execute();
 
             return $stmt;
+        }
+
+        function getInvInfoByWF($workflow_id) {
+            $query = "SELECT a.invoice_id, a.invRef, a.InvStatus FROM {$this->table_name} a WHERE a.workflow_id = '{$workflow_id}';";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row;
+        }
+
+        function updateInvRef() {
+            $query = "UPDATE
+                        {$this->table_name}
+                    SET
+                        invRef = ?
+                    WHERE
+                        invoice_id = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $invRef = $this->invoiceGen($this->invoice_id, 6, "PRO");
+
+            $stmt->bindParam(1, $invRef);
+            $stmt->bindParam(2, $this->invoice_id);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

@@ -7,6 +7,7 @@
 
     include_once '../config/db.php';
     // include_once '../objects/pastel.php';
+    include_once '../objects/invoice.php';
     include_once '../objects/workflow.php';
 
     $database = new Database();
@@ -15,6 +16,7 @@
     // $srv_database = new DelServerDatabase();
     // $srvdb = $srv_database->getConnection();
 
+    $invoice = new Invoice($db);
     $workflow = new Workflow($db);
     $history = new WorkflowHistory($db);
 
@@ -41,6 +43,7 @@
                 // 'time' => $history->readLastUpdateDate($workflow_id),
                 'time' => $time,
                 'company_name' => $company_name,
+                'customerCode' => $customerCode,
                 'status' => $status,
                 'urgent' => $urgent,
                 'cust_id' => $cust_id,
@@ -53,6 +56,13 @@
                 'invoice_id' => isset($invoice_id) ? $invoice_id : '',
                 // 'allocs' => $postar->ifAlloc($invoiceNo)
             );
+
+            $inv_data = $invoice->getInvInfoByWF($workflow_id);
+            if (isset($inv_data)) {
+                $workflow_item['invoice_id'] = $inv_data['invoice_id'];
+                $workflow_item['InvStatus'] = $inv_data['InvStatus'];
+                $workflow_item['invRef'] = $inv_data['invRef'];
+            }
 
             array_push($workflow_arr['records'], $workflow_item);
         }

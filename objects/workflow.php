@@ -71,7 +71,9 @@
         // Sales & Delivery Workflow
 
         function read($case) {
+            $add_data = "";
             $condition = "";
+            $alt_table = "";
             switch (+$case) {
                 case 1:
                     $condition = " AND a.status BETWEEN 1 AND 3 ";
@@ -89,7 +91,7 @@
                     $condition = " AND a.status IN (6, 9, 8) ";
                     break;
             }
-            $query = "SELECT b.cust_id, b.company_name, a.workflow_id, a.time, a.status, a.urgent, a.cust_id, a.orderNo, a.purchase, a.invoiceNo, a.vehicleNo, a.sessionID, a.invoice_id FROM {$this->table_name} a, del_cust b WHERE b.cust_id = a.cust_id AND a.status <> 0 {$condition} ORDER BY a.time DESC";
+            $query = "SELECT b.cust_id, b.company_name, a.workflow_id, a.time, a.status, a.urgent, a.cust_id, a.orderNo, a.purchase, a.invoiceNo, a.vehicleNo, a.sessionID, b.customerCode, a.invoice_id{$add_data} FROM {$this->table_name} a, del_cust b{$alt_table} WHERE b.cust_id = a.cust_id AND a.status <> 0 {$condition} ORDER BY a.time DESC";
 
             $stmt = $this->conn->prepare($query);
 
@@ -304,7 +306,7 @@
         }
 
         function update($num) {
-            $condition;
+            $condition = "";
 
             switch ($num) {
                 case 0:
@@ -327,7 +329,7 @@
             $query = "UPDATE
                         {$this->table_name}
                     SET
-                        status = :status{$condition}
+                        `status` = :stat{$condition}
                     WHERE
                         workflow_id = :workflow_id;";
 
@@ -352,7 +354,7 @@
                         break;
                 }
 
-            $stmt->bindParam(':status', $this->status);
+            $stmt->bindParam(':stat', $this->status);
             $stmt->bindParam(':workflow_id', $this->workflow_id);
             
             if ($stmt->execute()) {
