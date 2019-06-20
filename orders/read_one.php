@@ -18,6 +18,10 @@
     $invoice = new Invoice($db);
     $lines = new InvoiceLines($db);
 
+    if (isset($srvdb)) {
+        $client = new Client($srvdb);
+    }
+
     $invoice->invoice_id = isset($_GET['id']) ? $_GET['id'] : die();
 
     $stmt = $invoice->getInvoice();
@@ -44,8 +48,22 @@
             'workflow_id' => $workflow_id,
             'notes' => $notes,
             'cust_id' => $cust_id,
-            'user' => $user
+            'user' => $user,
+            'invRef' => $invRef
         );
+
+        if (isset($srvdb) && isset($customerCode)) {
+            $client_data = $client->getInfo($customerCode);
+
+            $invoice_item['Physical1'] = $client_data['Physical1'];
+            $invoice_item['Physical2'] = $client_data['Physical2'];
+            $invoice_item['Physical3'] = $client_data['Physical3'];
+            $invoice_item['Physical4'] = $client_data['Physical4'];
+            $invoice_item['Tax_Number'] = $client_data['Tax_Number'];
+            $invoice_item['Registration'] = $client_data['Registration'];
+            $invoice_item['Contact_Person'] = $client_data['Contact_Person'];
+            $invoice_item['Telephone'] = $client_data['Telephone'];
+        }
 
         $invoice_item['entries'] = array();
 
