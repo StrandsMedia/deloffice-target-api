@@ -411,7 +411,7 @@
         }
 
         function urgentOrPurchase($status) {
-            $condition;
+            $condition = "";
 
             if ($status === 'urgent') {
                 $condition = " urgent = :status ";
@@ -707,7 +707,7 @@
 
             $stmtComplete->execute();
 
-            $numComplete = $numComplete->rowCount();
+            $numComplete = $stmtComplete->rowCount();
 
             if ($numComplete == $numTotal) {
                 $query = "SELECT
