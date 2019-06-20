@@ -180,6 +180,66 @@
             return $row;
         }
 
+        function updateInvoice() {
+            $query = "UPDATE
+                        {$this->table_name}
+                    SET
+                        company_name = :company_name,
+                        Contact_Person = :Contact_Person,
+                        Telephone = :Telephone,
+                        Physical1 = :Physical1,
+                        Physical2 = :Physical2,
+                        Physical3 = :Physical3,
+                        Physical4 = :Physical4,
+                        Registration = :Registration,
+                        Tax_Number = :Tax_Number,
+                        customerCode = :customerCode,
+                        iARPriceListNameID = :iARPriceListNameID,
+                        TotalExcl = :TotalExcl,
+                        TotalTax = :TotalTax,
+                        TotalIncl = :TotalIncl,
+                        DCLink = :DCLink,
+                        user = :user,
+                        InvStatus = :InvStatus,
+                        workflow_id = :workflow_id,
+                        invNumber = :invNumber,
+                        poNumber = :poNumber,
+                        notes = :notes
+                    WHERE
+                        invoice_id = :invoice_id;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(':company_name', $this->company_name);
+            $stmt->bindParam(':Contact_Person', $this->Contact_Person);
+            $stmt->bindParam(':Telephone', $this->Telephone);
+            $stmt->bindParam(':Physical1', $this->Physical1);
+            $stmt->bindParam(':Physical2', $this->Physical2);
+            $stmt->bindParam(':Physical3', $this->Physical3);
+            $stmt->bindParam(':Physical4', $this->Physical4);
+            $stmt->bindParam(':Registration', $this->Registration);
+            $stmt->bindParam(':Tax_Number', $this->Tax_Number);
+            $stmt->bindParam(':customerCode', $this->customerCode);
+            $stmt->bindParam(':iARPriceListNameID', $this->iARPriceListNameID);
+            $stmt->bindParam(':TotalExcl', $this->TotalExcl);
+            $stmt->bindParam(':TotalTax', $this->TotalTax);
+            $stmt->bindParam(':TotalIncl', $this->TotalIncl);
+            $stmt->bindParam(':DCLink', $this->DCLink);
+            $stmt->bindParam(':user', $this->user);
+            $stmt->bindParam(':InvStatus', $this->InvStatus);
+            $stmt->bindParam(':workflow_id', $this->workflow_id);
+            $stmt->bindParam(':invNumber', $this->invNumber);
+            $stmt->bindParam(':poNumber', $this->poNumber);
+            $stmt->bindParam(':notes', $this->notes);
+            $stmt->bindParam(':invoice_id', $this->invoice_id);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         function updateInvRef() {
             $query = "UPDATE
                         {$this->table_name}
@@ -307,6 +367,45 @@
             $stmt->bindParam(':qty', $this->qty);
             $stmt->bindParam(':pricecat', $this->pricecat);
             $stmt->bindParam(':fExclPrice2', $this->fExclPrice2);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function updateInvLine() {
+            $query = "UPDATE 
+                        {$this->table_name}
+                    SET 
+                        qty = :qty,
+                        fExclPrice = :fExclPrice,
+                        fExclPrice2 = :fExclPrice2
+                    WHERE 
+                        invlineid = :invlineid;";
+
+            $stmt = $this->conn->prepare($query);  
+            
+            $stmt->bindParam(':qty', $this->qty);
+            $stmt->bindParam(':fExclPrice', $this->fExclPrice);
+            $stmt->bindParam(':fExclPrice2', $this->fExclPrice2);
+            $stmt->bindParam(':invlineid', $this->invlineid);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function deleteInvLine() {
+            $query = "DELETE FROM {$this->table_name}
+                        WHERE invlineid = :invlineid;";
+            
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(':invlineid', $this->invlineid);
 
             if ($stmt->execute()) {
                 return true;

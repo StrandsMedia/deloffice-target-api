@@ -55,6 +55,7 @@
         if (isset($srvdb) && isset($customerCode)) {
             $client_data = $client->getInfo($customerCode);
 
+            $invoice_item['DCLink'] = $client_data['DCLink'];
             $invoice_item['Physical1'] = $client_data['Physical1'];
             $invoice_item['Physical2'] = $client_data['Physical2'];
             $invoice_item['Physical3'] = $client_data['Physical3'];
