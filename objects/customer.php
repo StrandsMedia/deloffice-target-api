@@ -7,6 +7,13 @@
         public $customerCode;
         public $company_name;
         public $address;
+        public $address2;
+        public $address3;
+
+        public $location;
+        public $location2;
+        public $location3;
+
         public $notes;
         public $tel;
         public $tel2;
@@ -52,7 +59,7 @@
             $query = "INSERT INTO
                     {$this->table_name}
                 SET
-                    customerCode=:customerCode, company_name=:company_name, contact_person=:contact_person, email=:email, tel=:tel, fax=:fax, mob=:mob, address=:address, sector=:sector, subsector=:subsector, category=:category";
+                    customerCode=:customerCode, company_name=:company_name, contact_person=:contact_person, email=:email, tel=:tel, fax=:fax, mob=:mob, address=:address, sector=:sector, subsector=:subsector, category=:category, location=:location;";
 
             $stmt = $this->conn->prepare($query);
 
@@ -60,6 +67,7 @@
             $this->company_name = htmlspecialchars(strip_tags($this->company_name));
             $this->contact_person = htmlspecialchars(strip_tags($this->contact_person));
             $this->address = htmlspecialchars(strip_tags($this->address));
+            $this->location = htmlspecialchars(strip_tags($this->location));
             $this->email = htmlspecialchars(strip_tags($this->email));
             $this->tel = htmlspecialchars(strip_tags($this->tel));
             $this->fax = htmlspecialchars(strip_tags($this->fax));
@@ -72,6 +80,7 @@
             $stmt->bindParam(":company_name", $this->company_name);
             $stmt->bindParam(":contact_person", $this->contact_person);
             $stmt->bindParam(":address", $this->address);
+            $stmt->bindParam(":location", $this->location);
             $stmt->bindParam(":email", $this->email);
             $stmt->bindParam(":tel", $this->tel);
             $stmt->bindParam(":fax", $this->fax);
@@ -132,9 +141,14 @@
             $this->category = $row['category'];
             $this->sector = $row['sector'];
             $this->subsector = $row['subsector'];
-            $this->sector_name = $row['sector_name'];
-            $this->subsector_name = $row['subsector_name'];
+            $this->sector_name = isset($row['sector_name']) ? $row['sector_name'] : null;
+            $this->subsector_name = isset($row['subsector_name']) ? $row['subsector_name'] : null;
             $this->address = $row['address'];
+            $this->address2 = $row['address2'];
+            $this->address3 = $row['address3'];
+            $this->location = $row['location'];
+            $this->location2 = $row['location2'];
+            $this->location3 = $row['location3'];
             $this->notes = $row['notes'];
             $this->comment = $row['comment'];
             $this->contact_person = $row['contact_person'];
@@ -227,6 +241,13 @@
                         company_name = :company_name,
                         customerCode = :customerCode,
                         address = :address,
+                        address2 = :address2,
+                        address3 = :address3,
+
+                        location = :location,
+                        location2 = :location2,
+                        location3 = :location3,
+
                         category = :category,
                         sector = :sector,
                         subsector = :subsector
@@ -241,6 +262,13 @@
             $stmt->bindParam(':company_name', $this->company_name);
             $stmt->bindParam(':customerCode', $this->customerCode);
             $stmt->bindParam(':address', $this->address);
+            $stmt->bindParam(':address2', $this->address2);
+            $stmt->bindParam(':address3', $this->address3);
+
+            $stmt->bindParam(':location', $this->location);
+            $stmt->bindParam(':location2', $this->location2);
+            $stmt->bindParam(':location3', $this->location3);
+
             $stmt->bindParam(':category', $this->category);
             $stmt->bindParam(':sector', $this->sector);
             $stmt->bindParam(':subsector', $this->subsector);
