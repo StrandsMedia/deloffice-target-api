@@ -10,6 +10,15 @@
     include_once '../objects/invoice.php';
     include_once '../objects/proforma.php';
 
+    function array_sort_by_column(&$arr, $col, $dir = SORT_DESC) {
+        $sort_col = array();
+        foreach($arr as $key => $row) {
+            $sort_col[$key] = $row[$col];
+        }
+
+        array_multisort($sort_col, $dir, $arr);
+    }
+
     $database = new Database();
     $db = $database->getConnection();
 
@@ -56,6 +65,7 @@
             }
 
             $stmt2 = $history->readHistory($workflow_id);
+            $stmt3 = $proforma->readByWF($workflow_id);
 
             $num2 = $stmt2->rowCount();
 
@@ -77,6 +87,26 @@
 
                     array_push($history, $history_item);
                 }
+
+                if ($stmt3->rowCount() > 0) {
+                    while ($row3 = $stmt3->fetch(PDO::FETCH_ASSOC)) {
+                        $history_item = array(
+                            'historyid' => $row3['history_id'],
+                            'workflow_id' => $row3['workflow_id'],
+                            'time' => $row3['time'],
+                            'user' => $row3['user'],
+                            'note' => $row3['note'],
+                            'comment' => $row3['comment'],
+                            'step' => $row3['step'],
+                            'stepname' => $row3['stepname'],
+                            'sales_rep' => $row3['sales_rep']
+                        );
+
+                        array_push($history, $history_item);
+                    }
+                }
+
+                array_sort_by_column($history, 'time', SORT_ASC);
 
                 $event_item['history'] = $history;
             }
