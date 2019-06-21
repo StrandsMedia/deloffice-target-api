@@ -22,6 +22,13 @@
             $customer->company_name = $data->company_name;
             $customer->customerCode = $data->customerCode;
             $customer->address = $data->address;
+            $customer->address2 = $data->address2;
+            $customer->address3 = $data->address3;
+
+            $customer->location = $data->location;
+            $customer->location2 = $data->location2;
+            $customer->location3 = $data->location3;
+            
             $customer->category = $data->category;
             $customer->sector = $data->sector;
             $customer->subsector = $data->subsector;
