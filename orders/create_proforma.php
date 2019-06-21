@@ -7,6 +7,7 @@
 
     include_once '../config/db.php';
     include_once '../objects/invoice.php';
+    include_once '../objects/proforma.php';
     include_once '../objects/workflow.php';
 
     $database = new Database();
@@ -14,6 +15,7 @@
 
     $workflow = new Workflow($db);
     $invoice = new Invoice($db);
+    $proforma = new ProformaHistory($db);
 
     $data = json_decode(file_get_contents('php://input'));
 
@@ -26,12 +28,20 @@
 
             $workflow->workflow_id = $data->workflow_id;
             $workflow->status = 25;
+
+            $proforma->workflow_id = $data->workflow_id;
+            $proforma->user = $data->user;
+            $proforma->step = 1;
+            $proforma->note = '';
+            $proforma->comment = '';
             if ($workflow->update(4)) {
                 if ($invoice->createProforma()) {
                     $invoice->invoice_id = $db->lastInsertId();
                     if ($invoice->updateInvRef()) {
-                        http_response_code(201);
-                        echo json_encode($invoice->invoice_id);
+                        if ($proforma->create()) {
+                            http_response_code(201);
+                            echo json_encode($invoice->invoice_id);
+                        }
                     }
                 }
             }
