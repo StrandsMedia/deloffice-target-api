@@ -52,6 +52,7 @@
                         customerCode = :customerCode,
                         user = :user,
                         workflow_id = :workflow_id,
+                        InvDate = CURRENT_TIMESTAMP,
                         InvStatus = 1;";
 
             $stmt = $this->conn->prepare($query);
