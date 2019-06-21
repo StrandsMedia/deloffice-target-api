@@ -87,7 +87,7 @@
                         $prod_item['AveUCst'] = $row2['AveUCst'];
 
                         $fetchtax = $taxrate->getTaxRate(1.4);
-                        $prod_item['TaxRate'] = +$fetchtax['TaxRate'] / 100;
+                        $prod_item['TaxRate'] = +$fetchtax['TaxRate'];
                         $prod_item['idTaxRate'] = $fetchtax['idTaxRate'];
                     }
 
