@@ -8,6 +8,7 @@
     include_once '../config/db.php';
     include_once '../objects/workflow.php';
     include_once '../objects/invoice.php';
+    include_once '../objects/proforma.php';
 
     $database = new Database();
     $db = $database->getConnection();
@@ -16,6 +17,8 @@
     $details = new WorkflowDetails($db);
     $history = new WorkflowHistory($db);
     $lines = new InvoiceLines($db);
+
+    $proforma = new ProformaHistory($db);
 
     $workflow->workflow_id = isset($_GET['id']) ? $_GET['id'] : die();
 
