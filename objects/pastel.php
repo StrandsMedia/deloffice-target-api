@@ -72,6 +72,16 @@
         }
 
         function getTerms($acc) {
+            /** 
+             * 0 is Current
+             * 1 is 30 Days
+             * 2 is 60 Days
+             * 3 is 90 Days
+             * 4 is 120 Days
+             * 5 is 150 Days
+             * 6 is 180 Days
+            */
+
             $query = "SELECT AccountTerms FROM {$this->table_name} WHERE Account = '{$acc}'";
 
             $stmt = $this->conn->prepare($query);
@@ -401,6 +411,50 @@
             } else {
                 return false;
             }
+        }
+
+        function getOutstanding($period) {
+            $condition = "";
+
+            switch ($period) {
+                case 0:
+                    $condition = ">= 31 ";
+                    break;
+                case 1:
+                    $condition = ">= 61 ";
+                    break;
+                case 2:
+                    $condition = ">= 91 ";
+                    break;
+                case 3:
+                    $condition = ">= 121 ";
+                    break;
+                case 4:
+                    $condition = ">= 151 ";
+                    break;
+                case 5:
+                    $condition = "> 180 ";
+                    break;
+            }
+
+            $query = "SELECT
+                        SUM(Outstanding) as Outstanding
+                    FROM
+                        {$this->table_name}
+                    WHERE
+                        DATEDIFF(dayofyear, Cast(TxDate as datetime), GETDATE()) {$condition}
+                    AND
+                        AccountLink = ?;";
+
+            $stmt = $this->conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+
+            $stmt->bindParam(1, $this->AccountLink);
+
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row['Outstanding'];
         }
 
         function getAgeAnalysis($period) {
