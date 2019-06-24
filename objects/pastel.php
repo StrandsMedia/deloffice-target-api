@@ -416,7 +416,7 @@
         function getOutstanding($period) {
             $condition = "";
 
-            switch ($period) {
+            switch (+$period) {
                 case 0:
                     $condition = ">= 31 ";
                     break;
@@ -433,6 +433,9 @@
                     $condition = ">= 151 ";
                     break;
                 case 5:
+                    $condition = "> 180 ";
+                    break;
+                case 6:
                     $condition = "> 180 ";
                     break;
             }
