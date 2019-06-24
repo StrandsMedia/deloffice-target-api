@@ -48,7 +48,7 @@
             $invoice->TotalIncl = $data->TotalIncl;
             $invoice->InvDate = $data->InvDate;
 
-            switch ($data->status) {
+            switch ($data->status) {                
                 case 'confirm':
                     $invoice->InvStatus = 5;
 
@@ -80,6 +80,7 @@
             $invoice->poNumber = $data->poNumber;
             $invoice->notes = $data->notes;
             $invoice->invRef = $data->invRef;
+            $invoice->invoice_id = $data->invoice_id;
             
             if ($invoice->updateInvoice()) {
                 $proforma->workflow_id = $data->workflow_id;
@@ -133,13 +134,13 @@
                         http_response_code(200);
                         echo json_encode(array(
                             'status' => 'success',
-                            'message' => 'Proforma invoice updated successfully.'
+                            'message' => 'Proforma invoice processed successfully.'
                         ));
                     } else {
                         http_response_code(200);
                         echo json_encode(array(
                             'status' => 'success',
-                            'message' => 'Failed to update invoice.'
+                            'message' => 'Failed to process invoice.'
                         ));
                     }
                 }

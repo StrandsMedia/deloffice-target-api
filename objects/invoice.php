@@ -185,60 +185,59 @@
             $query = "UPDATE
                         {$this->table_name}
                     SET
-                        company_name = :company_name,
-                        Contact_Person = :Contact_Person,
-                        Telephone = :Telephone,
-                        Physical1 = :Physical1,
-                        Physical2 = :Physical2,
-                        Physical3 = :Physical3,
-                        Physical4 = :Physical4,
-                        Registration = :Registration,
-                        Tax_Number = :Tax_Number,
-                        customerCode = :customerCode,
-                        iARPriceListNameID = :iARPriceListNameID,
-                        TotalExcl = :TotalExcl,
-                        TotalTax = :TotalTax,
-                        TotalIncl = :TotalIncl,
-                        DCLink = :DCLink,
-                        user = :user,
-                        InvStatus = :InvStatus,
-                        workflow_id = :workflow_id,
-                        invNumber = :invNumber,
-                        poNumber = :poNumber,
-                        notes = :notes
+                        `company_name` = :company_name,
+                        `Contact_Person` = :Contact_Person,
+                        `Telephone` = :Telephone,
+                        `Physical1` = :Physical1,
+                        `Physical2` = :Physical2,
+                        `Physical3` = :Physical3,
+                        `Physical4` = :Physical4,
+                        `Registration` = :Registration,
+                        `Tax_Number` = :Tax_Number,
+                        `customerCode` = :customerCode,
+                        `TotalExcl` = :TotalExcl,
+                        `TotalTax` = :TotalTax,
+                        `TotalIncl` = :TotalIncl,
+                        `DCLink` = :DCLink,
+                        `user` = :userId,
+                        `InvStatus` = :InvStatus,
+                        `workflow_id` = :workflow_id,
+                        `invNumber` = :invNumber,
+                        `poNumber` = :poNumber,
+                        `notes` = :notes
                     WHERE
-                        invoice_id = :invoice_id;";
+                        (`invoice_id` = :invoice_id);";
 
             $stmt = $this->conn->prepare($query);
 
-            $stmt->bindParam(':company_name', $this->company_name);
-            $stmt->bindParam(':Contact_Person', $this->Contact_Person);
-            $stmt->bindParam(':Telephone', $this->Telephone);
-            $stmt->bindParam(':Physical1', $this->Physical1);
-            $stmt->bindParam(':Physical2', $this->Physical2);
-            $stmt->bindParam(':Physical3', $this->Physical3);
-            $stmt->bindParam(':Physical4', $this->Physical4);
-            $stmt->bindParam(':Registration', $this->Registration);
-            $stmt->bindParam(':Tax_Number', $this->Tax_Number);
-            $stmt->bindParam(':customerCode', $this->customerCode);
-            $stmt->bindParam(':iARPriceListNameID', $this->iARPriceListNameID);
-            $stmt->bindParam(':TotalExcl', $this->TotalExcl);
-            $stmt->bindParam(':TotalTax', $this->TotalTax);
-            $stmt->bindParam(':TotalIncl', $this->TotalIncl);
-            $stmt->bindParam(':DCLink', $this->DCLink);
-            $stmt->bindParam(':user', $this->user);
-            $stmt->bindParam(':InvStatus', $this->InvStatus);
-            $stmt->bindParam(':workflow_id', $this->workflow_id);
-            $stmt->bindParam(':invNumber', $this->invNumber);
-            $stmt->bindParam(':poNumber', $this->poNumber);
-            $stmt->bindParam(':notes', $this->notes);
-            $stmt->bindParam(':invoice_id', $this->invoice_id);
+            $stmt->bindParam(':company_name', $this->company_name, PDO::PARAM_STR);
+            $stmt->bindParam(':Contact_Person', $this->Contact_Person, PDO::PARAM_STR);
+            $stmt->bindParam(':Telephone', $this->Telephone, PDO::PARAM_STR);
+            $stmt->bindParam(':Physical1', $this->Physical1, PDO::PARAM_STR);
+            $stmt->bindParam(':Physical2', $this->Physical2, PDO::PARAM_STR);
+            $stmt->bindParam(':Physical3', $this->Physical3, PDO::PARAM_STR);
+            $stmt->bindParam(':Physical4', $this->Physical4, PDO::PARAM_STR);
+            $stmt->bindParam(':Registration', $this->Registration, PDO::PARAM_STR);
+            $stmt->bindParam(':Tax_Number', $this->Tax_Number, PDO::PARAM_STR);
+            $stmt->bindParam(':customerCode', $this->customerCode, PDO::PARAM_STR);
+            $stmt->bindParam(':TotalExcl', $this->TotalExcl, PDO::PARAM_STR);
+            $stmt->bindParam(':TotalTax', $this->TotalTax, PDO::PARAM_STR);
+            $stmt->bindParam(':TotalIncl', $this->TotalIncl, PDO::PARAM_STR);
+            $stmt->bindParam(':DCLink', $this->DCLink, PDO::PARAM_INT);
+            $stmt->bindParam(':userId', $this->user, PDO::PARAM_INT);
+            $stmt->bindParam(':InvStatus', $this->InvStatus, PDO::PARAM_INT);
+            $stmt->bindParam(':workflow_id', $this->workflow_id, PDO::PARAM_INT);
+            $stmt->bindParam(':invNumber', $this->invNumber, PDO::PARAM_INT);
+            $stmt->bindParam(':poNumber', $this->poNumber, PDO::PARAM_INT);
+            $stmt->bindParam(':notes', $this->notes, PDO::PARAM_STR);
+            $stmt->bindParam(':invoice_id', $this->invoice_id, PDO::PARAM_INT);
 
             if ($stmt->execute()) {
                 return true;
-            } else {
-                return false;
             }
+                
+            return false;
+            
         }
 
         function updateInvRef() {
