@@ -8,6 +8,7 @@
     include_once '../config/db.php';
     include_once '../objects/invoice.php';
     include_once '../objects/pastel.php';
+    include_once '../objects/purgatory.php';
 
     $database = new Database();
     $db = $database->getConnection();
@@ -17,6 +18,7 @@
 
     $invoice = new Invoice($db);
     $lines = new InvoiceLines($db);
+    $purgatory = new Purgatory($db);
 
     if (isset($srvdb)) {
         $client = new Client($srvdb);
@@ -91,7 +93,8 @@
                 'pricecat' => $pricecat,
                 'fExclPrice2' => $fExclPrice2,
                 'checked' => $checked,
-                'verified' => $verified
+                'verified' => $verified,
+                'purgatory' => $purgatory->ifPurgatory($invlineid)
             );
 
             if (isset($srvdb)) {

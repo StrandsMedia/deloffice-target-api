@@ -45,7 +45,7 @@
             
                         echo json_encode(array(
                             'status' => 'success',
-                            'message' => 'Purgatory was successfully created'
+                            'message' => 'Purgatory entry was successfully created'
                         ));
                     }
                 } else {
@@ -53,7 +53,7 @@
         
                     echo json_encode(array(
                         'status' => 'error',
-                        'message' => 'Unable to create purgatory'
+                        'message' => 'Unable to create purgatory entry'
                     ));
                 }
             }
@@ -62,7 +62,7 @@
     
             echo json_encode(array(
                 'status' => 'error',
-                'message' => 'Unable to create purgatory. No data was found.'
+                'message' => 'Unable to create purgatory entry. No data was found.'
             ));
         }
     }

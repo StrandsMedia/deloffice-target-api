@@ -65,7 +65,21 @@
 
             $stmt->bindParam(1, $this->entryType, PDO::PARAM_INT);
 
+            $stmt->execute();
+
             return $stmt;
+        }
+
+        function ifPurgatory($id) {
+            $query = "SELECT * FROM {$this->table_name} WHERE invlineid = ? LIMIT 0,1;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $id);
+
+            $stmt->execute();
+
+            return $stmt->rowCount() > 0;
         }
     }
 ?>
