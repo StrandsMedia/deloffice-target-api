@@ -261,6 +261,26 @@
                 return false;
             }
         }
+
+        function updateInvStatus() {
+            $query = "UPDATE
+                        {$this->table_name}
+                    SET
+                        InvStatus = ?
+                    WHERE
+                        invoice_id = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->InvStatus);
+            $stmt->bindParam(2, $this->invoice_id);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 
     class InvoiceLines {
