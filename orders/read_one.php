@@ -89,7 +89,9 @@
                 'p_id' => $p_id,
                 'qty' => $qty,
                 'pricecat' => $pricecat,
-                'fExclPrice2' => $fExclPrice2
+                'fExclPrice2' => $fExclPrice2,
+                'checked' => $checked,
+                'verified' => $verified
             );
 
             if (isset($srvdb)) {

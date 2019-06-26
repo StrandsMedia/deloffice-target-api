@@ -654,5 +654,33 @@
                 return $productlist;
             }
         }
+
+        function markChecked() {
+            $query = "UPDATE {$this->table_name} SET checked = 1 WHERE invlineid = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->invlineid);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function markVerified() {
+            $query = "UPDATE {$this->table_name} SET verified = 1 WHERE invlineid = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->invlineid);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 ?>
