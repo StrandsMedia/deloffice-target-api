@@ -64,6 +64,10 @@
                 $event_item['products'] = $lines->getProducts($workflow_id);
             }
 
+            if (!isset($invoice_id)) {
+                $event_item['invoice_id'] = $workflow->getInvoiceId($workflow_id);
+            }
+
             $stmt2 = $history->readHistory($workflow_id);
             $stmt3 = $proforma->readByWF($workflow_id);
 

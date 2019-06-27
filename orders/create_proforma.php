@@ -35,17 +35,21 @@
             $proforma->step = 1;
             $proforma->note = '';
             $proforma->comment = '';
-            if ($workflow->update(4)) {
+            
                 if ($invoice->createProforma()) {
                     $invoice->invoice_id = $db->lastInsertId();
                     if ($invoice->updateInvRef()) {
-                        if ($proforma->create()) {
-                            http_response_code(201);
-                            echo json_encode($invoice->invoice_id);
+                        $workflow->invoice_id = $invoice->invoice_id;
+
+                        if ($workflow->update(5)) {
+                            if ($proforma->create()) {
+                                http_response_code(201);
+                                echo json_encode($invoice->invoice_id);
+                            }
                         }
                     }
                 }
-            }
+            
         } else {
             echo json_encode(array(
                 'status' => 'error',

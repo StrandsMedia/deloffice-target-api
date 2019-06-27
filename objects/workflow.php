@@ -324,6 +324,9 @@
                 case 4:
                     $condition = "";
                     break;
+                case 5:
+                    $condition = ", invoice_id = :invoice_id ";
+                    break;
             }
 
             $query = "UPDATE
@@ -351,6 +354,9 @@
                         break;
                     case 4:
                         //
+                        break;
+                    case 5:
+                        $stmt->bindParam(':invoice_id', $this->invoice_id);
                         break;
                 }
 
@@ -408,6 +414,34 @@
             }
             
             return false;
+        }
+
+        function getInvoiceId($workflow_id) {
+            $invoiceId = 0;
+
+            $query1 = "SELECT invoice_id FROM workflow WHERE workflow_id = ? LIMIT 0,1;";
+            $query2 = "SELECT invoice_id FROM invoice WHERE workflow_id = ? ORDER BY invoice_id DESC LIMIT 0,1;";
+
+            $stmt1 = $this->conn->prepare($query1);
+            $stmt2 = $this->conn->prepare($query2);
+
+            $stmt1->bindParam(1, $workflow_id, PDO::PARAM_INT);
+            $stmt2->bindParam(1, $workflow_id, PDO::PARAM_INT);
+
+            $stmt1->execute();
+            $stmt2->execute();
+
+            if ($stmt1->rowCount() > 0) {
+                $row1 = $stmt1->fetch(PDO::FETCH_ASSOC);
+                $invoiceId = $row1['invoice_id'];
+
+                if (!isset($invoiceId) || $invoiceId == 0) {
+                    $row2 = $stmt2->fetch(PDO::FETCH_ASSOC);
+                    $invoiceId = $row2['invoice_id'];
+                }
+            }
+
+            return $invoiceId;
         }
 
         function urgentOrPurchase($status) {
