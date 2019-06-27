@@ -176,9 +176,13 @@
 
             $stmt->execute();
 
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            return $row;
+            if ($stmt->rowCount() > 0) {
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+                return $row;
+            } else {
+                return null;
+            }
         }
 
         function updateInvoice() {

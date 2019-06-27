@@ -25,6 +25,7 @@
     $workflow = new Workflow($db);
     $details = new WorkflowDetails($db);
     $history = new WorkflowHistory($db);
+    $invoice = new Invoice($db);
     $lines = new InvoiceLines($db);
 
     $proforma = new ProformaHistory($db);
@@ -66,6 +67,11 @@
 
             if (!isset($invoice_id)) {
                 $event_item['invoice_id'] = $workflow->getInvoiceId($workflow_id);
+            }
+
+            $invoice_data = $invoice->getInvInfoByWF($workflow_id);
+            if (isset($invoice_data)) {
+                $event_item['invRef'] = $invoice_data['invRef'];
             }
 
             $stmt2 = $history->readHistory($workflow_id);
