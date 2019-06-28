@@ -1,5 +1,4 @@
 <?php
-
     header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/json; charset=UTF-8');
     header('Access-Control-Allow-Methods: POST');
@@ -14,7 +13,6 @@
     $database = new Database();
     $db = $database->getConnection();
 
-    $workflow = new Workflow($db);
     $invoice = new Invoice($db);
     $proforma = new ProformaHistory($db);
 
@@ -22,42 +20,36 @@
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($data)) {
-            $invoice->company_name = $data->company_name;
-            $invoice->user = $data->user;
-            $invoice->customerCode = $data->customerCode;
-            $invoice->workflow_id = $data->workflow_id;
-
-            $workflow->workflow_id = $data->workflow_id;
-            $workflow->status = 25;
-
+            $invoice->InvStatus = 8;
+            $invoice->invoice_id = $data->invoice_id;
+        
             $proforma->workflow_id = $data->workflow_id;
             $proforma->user = $data->user;
-            $proforma->step = 1;
+            $proforma->step = $invoice->InvStatus;
             $proforma->note = '';
             $proforma->comment = '';
-            
-            if ($invoice->createProforma()) {
-                $invoice->invoice_id = $db->lastInsertId();
-                if ($invoice->updateInvRef()) {
-                    $workflow->invoice_id = $invoice->invoice_id;
-
-                    if ($workflow->update(5)) {
-                        if ($proforma->create()) {
-                            http_response_code(201);
-                            echo json_encode($invoice->invoice_id);
-                        }
-                    }
+        
+            if ($proforma->create()) {
+                if ($invoice->updateInvStatus()) {
+                    http_response_code(200);
+                    echo json_encode(array(
+                        'status' => 'success',
+                        'message' => 'Proforma invoice updated successfully.'
+                    ));
                 }
+            } else {
+                http_response_code(503);
+                echo json_encode(array(
+                    'status' => 'error',
+                    'message' => 'Failed to update invoice.'
+                ));
             }
-            
         } else {
+            http_response_code(503);
             echo json_encode(array(
                 'status' => 'error',
                 'message' => 'Data was not found or is incomplete. Please try again later.'
             ));
         }
     }
-
-
-
 ?>

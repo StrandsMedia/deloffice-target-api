@@ -145,7 +145,7 @@
                                 'message' => 'Proforma invoice processed successfully.'
                             ));
                         } else {
-                            http_response_code(200);
+                            http_response_code(503);
                             echo json_encode(array(
                                 'status' => 'success',
                                 'message' => 'Failed to process invoice.'

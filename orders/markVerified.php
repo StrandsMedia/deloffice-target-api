@@ -21,12 +21,12 @@
         echo json_encode(array(
             'status' => 'success',
             'message' => 'Successful Update.'
-        ))
+        ));
     } else {
         http_response_code(503);
         echo json_encode(array(
             'status' => 'error',
             'message' => 'Failed to update'
-        ))
+        ));
     }
 ?>
