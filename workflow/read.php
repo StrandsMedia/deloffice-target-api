@@ -28,8 +28,10 @@
 
     $case = isset($data->case) ? +$data->case : die();
 
-    $stmt = $workflow->read($case);
-    $num = $stmt->rowCount();
+    $stmt = $workflow->read($case, 1);
+    $stmt2 = $workflow->read($case, 2);
+    $stmt3 = $workflow->read($case, 3);
+    $num = $stmt->rowCount() + $stmt2->rowCount() + $stmt3->rowCount();
 
     if ($num > 0) {
         $workflow_arr = array();
