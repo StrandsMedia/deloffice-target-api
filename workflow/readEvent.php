@@ -31,8 +31,9 @@
     $proforma = new ProformaHistory($db);
 
     $workflow->workflow_id = isset($_GET['id']) ? $_GET['id'] : die();
+    $data = isset($_GET['d']) ? $_GET['d'] : die();
 
-    $stmt = $workflow->readEvent();
+    $stmt = $workflow->readEvent($data);
     $num = $stmt->rowCount();
 
     if ($num > 0) {

@@ -18,6 +18,7 @@
         public $company_name;
         public $range1;
         public $range2;
+        public $data;
 
         public function __construct($db) {
             $this->conn = $db;
@@ -117,11 +118,24 @@
 
         // Workflow Event
 
-        function readEvent() {
+        function readEvent($data) {
+            $table = "";
+            switch ($data) {
+                case 1:
+                    $table = 'del_cust';
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    break;
+            }
+
             $query = "SELECT
                         a.*, b.company_name, c.comments as dinstr, c.purchase as pinstr
                     FROM
-                        {$this->table_name} a, del_cust b, workflow_delivery c
+                        {$this->table_name} a, {$table} b, workflow_delivery c
                     WHERE
                         a.cust_id = b.cust_id
                     AND
@@ -173,17 +187,34 @@
             return $stmt;
         }
 
-        function findInvNum() {
+        function findInvNum($data) {
+            $table = "";
+            $condition = "";
+            switch ($data) {
+                case 1:
+                    $table = 'del_cust';
+                    $condition = " AND a.data = 1 ";
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    $condition = " AND a.data = 2 ";
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    $condition = " AND a.data = 3 ";
+                    break;
+            }
+
             $query = "SELECT
                         a.*, b.company_name, b.customerCode, c.step
                     FROM
-                        {$this->table_name} a, del_cust b, workflow_steps c
+                        {$this->table_name} a, {$table} b, workflow_steps c
                     WHERE
                         a.cust_id = b.cust_id
                     AND
                         a.status = c.step_id
                     AND
-                        a.invoiceNo LIKE ?;";
+                        a.invoiceNo LIKE ?{$condition};";
 
 
             $stmt = $this->conn->prepare($query);
@@ -198,7 +229,20 @@
             return $stmt;
         }
 
-        function readCompletion($invNum) {
+        function readCompletion($invNum, $data) {
+            $table = "";
+            switch ($data) {
+                case 1:
+                    $table = 'del_cust';
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    break;
+            }
+
             $query = "SELECT
                         a.invoiceNo, c.step, b.company_name, a.workflow_id, d.jobID, a.status
                     FROM

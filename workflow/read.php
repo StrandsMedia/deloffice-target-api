@@ -37,6 +37,8 @@
         $workflow_arr = array();
         $workflow_arr['records'] = array();
 
+        $temp_array = array();
+
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             extract($row);
 
@@ -45,6 +47,7 @@
                 // 'time' => $history->readLastUpdateDate($workflow_id),
                 'time' => $time,
                 'company_name' => $company_name,
+                'company' => 'DEL',
                 'customerCode' => $customerCode,
                 'status' => $status,
                 'urgent' => $urgent,
@@ -55,21 +58,88 @@
                 'creditNo' => isset($creditNo) ? $creditNo : '',
                 'vehicleNo' => $vehicleNo,
                 'sessionID' => $sessionID,
-                'invoice_id' => isset($invoice_id) ? $invoice_id : '',
-                // 'allocs' => $postar->ifAlloc($invoiceNo)
+                'invoice_id' => isset($invoice_id) ? $invoice_id : ''
             );
 
             $inv_data = $invoice->getInvInfoByWF($workflow_id);
+
             if (isset($inv_data)) {
                 $workflow_item['invoice_id'] = $inv_data['invoice_id'];
                 $workflow_item['InvStatus'] = $inv_data['InvStatus'];
                 $workflow_item['invRef'] = $inv_data['invRef'];
             }
 
-            array_push($workflow_arr['records'], $workflow_item);
+            array_push($temp_array, $workflow_item);
         }
 
-        $workflow->array_sort_by_column($workflow_arr['records'], 'time', SORT_DESC);
+        while ($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+            extract($row2);
+
+            $workflow_item2 = array(
+                'workflow_id' => $workflow_id,
+                // 'time' => $history->readLastUpdateDate($workflow_id),
+                'time' => $time,
+                'company_name' => $company_name,
+                'company' => 'RNS',
+                'customerCode' => $customerCode,
+                'status' => $status,
+                'urgent' => $urgent,
+                'cust_id' => $cust_id,
+                'orderNo' => $orderNo,
+                'purchase' => $purchase,
+                'invoiceNo' => $invoiceNo,
+                'creditNo' => isset($creditNo) ? $creditNo : '',
+                'vehicleNo' => $vehicleNo,
+                'sessionID' => $sessionID,
+                'invoice_id' => isset($invoice_id) ? $invoice_id : ''
+            );
+
+            $inv_data = $invoice->getInvInfoByWF($workflow_id);
+
+            if (isset($inv_data)) {
+                $workflow_item2['invoice_id'] = $inv_data['invoice_id'];
+                $workflow_item2['InvStatus'] = $inv_data['InvStatus'];
+                $workflow_item2['invRef'] = $inv_data['invRef'];
+            }
+
+            array_push($temp_array, $workflow_item2);
+        }
+
+        while ($row3 = $stmt3->fetch(PDO::FETCH_ASSOC)) {
+            extract($row3);
+
+            $workflow_item3 = array(
+                'workflow_id' => $workflow_id,
+                // 'time' => $history->readLastUpdateDate($workflow_id),
+                'time' => $time,
+                'company_name' => $company_name,
+                'company' => 'PNP',
+                'customerCode' => $customerCode,
+                'status' => $status,
+                'urgent' => $urgent,
+                'cust_id' => $cust_id,
+                'orderNo' => $orderNo,
+                'purchase' => $purchase,
+                'invoiceNo' => $invoiceNo,
+                'creditNo' => isset($creditNo) ? $creditNo : '',
+                'vehicleNo' => $vehicleNo,
+                'sessionID' => $sessionID,
+                'invoice_id' => isset($invoice_id) ? $invoice_id : ''
+            );
+
+            $inv_data = $invoice->getInvInfoByWF($workflow_id);
+
+            if (isset($inv_data)) {
+                $workflow_item3['invoice_id'] = $inv_data['invoice_id'];
+                $workflow_item3['InvStatus'] = $inv_data['InvStatus'];
+                $workflow_item3['invRef'] = $inv_data['invRef'];
+            }
+
+            array_push($temp_array, $workflow_item3);
+        }
+        
+        $workflow->array_sort_by_column($temp_array, 'time', SORT_DESC);
+        $workflow_arr['records'] = $temp_array;
 
         http_response_code(200);
         echo json_encode($workflow_arr);

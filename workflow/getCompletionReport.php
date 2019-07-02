@@ -12,8 +12,14 @@
     $database = new Database();
     $db = $database->getConnection();
 
-    $srv_database = new ServerDatabase();
-    $srvdb = $srv_database->getConnection();
+    $srv_database1 = new DelServerDatabase();
+    $srvdb = $srv_database1->getConnection();
+
+    $srv_database2 = new RnsServerDatabase();
+    $srvdb2 = $srv_database2->getConnection();
+
+    $srv_database3 = new PnpServerDatabase();
+    $srvdb3 = $srv_database3->getConnection();
 
     $workflow = new Workflow($db);
     $inv = new InvNum($srvdb);
@@ -35,7 +41,7 @@
                 'Account' => $Account
             );
 
-            $extra_data = $workflow->readCompletion($InvNumber);
+            $extra_data = $workflow->readCompletion($InvNumber, 1);
 
             if ($extra_data) {
                 $invoice_item['status'] = $extra_data['step'];
