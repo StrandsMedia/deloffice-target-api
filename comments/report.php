@@ -7,12 +7,15 @@
 
     include_once '../config/db.php';
     include_once '../objects/comments.php';
+    include_once '../objects/customer.php';
 
     $database = new Database();
     $db = $database->getConnection();
 
     $s_comment = new SalesComment($db);
     $d_comment = new DebtorsComment($db);
+
+    $customer = new Customer($db);
 
     $s_comment->date0 = isset($_GET['d1']) ? $_GET['d1'] : die();
     $s_comment->date1 = isset($_GET['d2']) ? $_GET['d2'] : die();
@@ -46,9 +49,14 @@
                 'date2' => $date2,
                 'sales_rep' => $sales_rep,
                 'dept' => $dept,
-                'company_name' => $company_name,
+                'data' => $data,
+                // 'company_name' => $company_name,
                 'type' => 'sales'
             );
+
+            $custdata = $customer->getCustDetails($data, $cust_id);
+
+            $comment_item['company_name'] = $custdata['company_name'];
 
             array_push($sales_comms, $comment_item);
         }
@@ -65,9 +73,14 @@
                 'date2' => $row2['date2'],
                 'sales_rep' => $row2['sales_rep'],
                 'dept' => $row2['dept'],
-                'company_name' => $row2['company_name'],
+                'data' => $data,
+                // 'company_name' => $row2['company_name'],
                 'type' => 'debtors'
             );
+
+            $custdata = $customer->getCustDetails($data, $cust_id);
+
+            $comment_item['company_name'] = $custdata['company_name'];
 
             array_push($debt_comms, $comment_item);
         }

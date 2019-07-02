@@ -10,6 +10,7 @@
         public $user;
         public $taskBy;
         public $date2;
+        public $data;
 
         public $date0;
         public $date1;
@@ -19,20 +20,27 @@
         }
 
         function read($optional) {
-            $condition = " ";
+            $condition = "";
 
             if ($optional['user']) {
-                $condition = " AND a.user = " . $optional['user'] . " ";
+                $condition = " AND a.user = {$optional['user']} ";
             } else {
                 $condition = $condition . "";
             }
             if (isset($optional['cust'])) {
-                $condition = " AND a.cust_id = " . $optional['cust'] . " ";
+                $condition = " AND a.cust_id = {$optional['cust']} AND a.data = {$optional['data']} ";
             } else {
                 $condition = $condition . "";
             }
 
-            $query = "SELECT a.cd_id, a.cust_id, a.comment, a.date, a.user, a.date2, a.taskBy, b.company_name, c.sales_rep, c.dept FROM " . $this->table_name . " a, del_cust b, sales_representative c WHERE a.cust_id = b.cust_id AND a.user = c.sales_id" . $condition . "ORDER BY a.cd_id DESC LIMIT 0, 100;";
+            $query = "SELECT 
+                        a.cd_id, a.cust_id, a.comment, a.date, a.user, a.date2, a.taskBy, a.data, c.sales_rep, c.dept
+                    FROM
+                        {$this->table_name} a, sales_representative c 
+                    WHERE
+                        a.user = c.sales_id{$condition}
+                    ORDER BY
+                        a.cd_id DESC LIMIT 0, 100;";
 
             $stmt = $this->conn->prepare($query);
 
@@ -43,12 +51,10 @@
 
         function report() {
             $query = "SELECT
-                        a.cd_id, a.cust_id, a.comment, a.date, a.user, a.date2, a.taskBy, b.company_name, c.sales_rep, c.dept 
+                        a.cd_id, a.cust_id, a.comment, a.date, a.user, a.date2, a.taskBy, a.data, c.sales_rep, c.dept 
                     FROM
-                        {$this->table_name} a, del_cust b, sales_representative c
+                        {$this->table_name} a, sales_representative c
                     WHERE
-                        a.cust_id = b.cust_id
-                    AND
                         a.user = c.sales_id
                     AND
                         a.date2 BETWEEN ? AND ?
@@ -92,10 +98,7 @@
             }
 
             return false; 
-        }
-
-        
-        
+        }       
     }
 
     class SalesComment extends Comment {
@@ -109,8 +112,7 @@
             $stmt->execute();
 
             return $stmt;
-        }
-        
+        }       
     }
 
     class DebtorsComment extends Comment {

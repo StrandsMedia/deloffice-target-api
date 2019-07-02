@@ -13,7 +13,7 @@
     
     $data = json_decode(file_get_contents("php://input"));
 
-    switch ($data->data) {
+    switch (+$data->data) {
         case 1:
             $customer = new DelCustomer($db);
             break;

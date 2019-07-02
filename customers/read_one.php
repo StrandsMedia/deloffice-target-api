@@ -86,6 +86,22 @@
         'updatedAt' => $customer->updatedAt,
     );
 
+    switch (+$data) {
+        case 1:
+            $customer_arr['company'] = 'DEL';
+            $customer_arr['data'] = 1;
+            break;
+        case 2:
+            $customer_arr['company'] = 'RNS';
+            $customer_arr['data'] = 2;
+            break;
+        case 3:
+            $customer_arr['company'] = 'PNP';
+            $customer_arr['data'] = 3;
+            break;
+    }
+
+
     print_r(json_encode($customer_arr));
 
 ?>

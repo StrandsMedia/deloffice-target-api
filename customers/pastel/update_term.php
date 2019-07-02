@@ -8,12 +8,24 @@
     include_once '../../config/db.php';
     include_once '../../objects/pastel.php';
 
-    $srvdatabase = new ServerDatabase();
-    $srvdb = $srvdatabase->getConnection();
+    $data = json_decode(file_get_contents("php://input"));
+
+    switch (+$data->data) {
+        case 1:
+            $srvdatabase = new DelServerDatabase();
+            $srvdb = $srvdatabase->getConnection();
+            break;
+        case 2:
+            $srvdatabase = new RnsServerDatabase();
+            $srvdb = $srvdatabase->getConnection();
+            break;
+        case 3:
+            $srvdatabase = new PnpServerDatabase();
+            $srvdb = $srvdatabase->getConnection();
+            break;
+    }
 
     $client = new Client($srvdb);
-
-    $data = json_decode(file_get_contents("php://input"));
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($data)) {

@@ -20,6 +20,7 @@
         public $status;
         public $createdAt;
         public $updatedAt;
+        public $data;
 
         public $company_name;
 
@@ -87,7 +88,7 @@
                 $condition = "AND b.company_name LIKE {$company_name}";
             }
 
-            $query = "SELECT a.*, b.company_name FROM {$this->table_name} a, del_cust b WHERE a.cust_id = b.cust_id {$condition} ORDER BY a.schedule LIMIT 50;";
+            $query = "SELECT a.*, a.data FROM {$this->table_name} a WHERE {$condition} ORDER BY a.schedule LIMIT 50;";
 
             $stmt = $this->conn->prepare($query);
 
@@ -98,12 +99,10 @@
 
         function readByCust() {
             $query = "SELECT
-                        a.*, b.company_name
+                        a.*, a.data
                     FROM
-                        {$this->table_name} a, del_cust b
+                        {$this->table_name} a
                     WHERE
-                        a.cust_id = b.cust_id
-                    AND
                         a.cust_id = ?
                     ORDER BY
                         a.schedule DESC LIMIT 5;";

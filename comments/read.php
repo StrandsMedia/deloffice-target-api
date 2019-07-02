@@ -7,15 +7,19 @@
 
     include_once '../config/db.php';
     include_once '../objects/comments.php';
+    include_once '../objects/customer.php';
 
     $database = new Database();
     $db = $database->getConnection();
 
     $comment = isset($_GET['s']) ? new SalesComment($db) : new DebtorsComment($db);
+
+    $customer = new Customer($db);
     
     $optional = array();
     $optional['user'] = isset($_GET['u']) ? $_GET['u'] : null;
     $optional['cust'] = isset($_GET['c']) ? $_GET['c'] : null;
+    $optional['data'] = isset($_GET['d']) ? $_GET['d'] : 1;
     
     $stmt = $comment->read($optional);
     $num = $stmt->rowCount();
@@ -37,8 +41,12 @@
                 'date2' => $date2,
                 'sales_rep' => $sales_rep,
                 'dept' => $dept,
-                'company_name' => $company_name
+                'data' => $data
             );
+
+            $custdata = $customer->getCustDetails($data, $cust_id);
+
+            $comment_item['company_name'] = $custdata['company_name'];
 
             array_push($comment_arr['records'], $comment_item);
         }

@@ -304,15 +304,23 @@
 
         function readByCust() {
             $table = "";
+            $condition = "";
             switch ($this->data) {
                 case 1:
                     $table = 'del_cust';
+                    $condition = " AND a.data = 1 ";
                     break;
                 case 2:
                     $table = 'rns_cust';
+                    $condition = " AND a.data = 2 ";
                     break;
                 case 3:
                     $table = 'pnp_cust';
+                    $condition = " AND a.data = 3 ";
+                    break;
+                default:
+                    $table = 'del_cust';
+                    $condition = " AND a.data = 1 ";
                     break;
             }
 
@@ -327,7 +335,7 @@
                     AND
                         a.cust_id = b.cust_id
                     AND
-                        a.cust_id = ?
+                        a.cust_id = ?{$condition}
                     ORDER BY workflow_id DESC
                     LIMIT 10;";
 

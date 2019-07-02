@@ -63,7 +63,7 @@
             array_push($temp_array, $customer_item3);
         }
 
-        $customer->array_sort_by_column($temp_array, 'updatedAt', SORT_DESC);
+        $customer->array_sort_by_column($temp_array, 'company_name', SORT_DESC);
         $customer_arr['records'] = $temp_array;
 
         http_response_code(200);

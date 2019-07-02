@@ -16,6 +16,8 @@
 
     $data = json_decode(file_get_contents('php://input'));
 
+    //$customer = new Customer($db);
+
     $tender->status = isset($data->status) ? $data->status : null;
     
     $tender->company_name = isset($data->company_name) ? $data->company_name : null;
@@ -49,7 +51,12 @@
                 'createdAt' => $createdAt,
                 'updatedAt' => $updatedAt,
                 'company_name' => $company_name
+                //'data' => $data
             );
+
+            //$custdata = $customer->getCustDetails($data, $cust_id);
+
+            //$tender_item['company_name'] = $custdata['company_name'];
 
             if (isset($tid)) {
                 $attach->getPath($tid);
