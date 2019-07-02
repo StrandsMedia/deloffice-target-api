@@ -58,7 +58,8 @@
                 'creditNo' => isset($creditNo) ? $creditNo : '',
                 'vehicleNo' => $vehicleNo,
                 'sessionID' => $sessionID,
-                'invoice_id' => isset($invoice_id) ? $invoice_id : ''
+                'invoice_id' => isset($invoice_id) ? $invoice_id : '',
+                'data' => 1
             );
 
             $inv_data = $invoice->getInvInfoByWF($workflow_id);
@@ -91,7 +92,8 @@
                 'creditNo' => isset($creditNo) ? $creditNo : '',
                 'vehicleNo' => $vehicleNo,
                 'sessionID' => $sessionID,
-                'invoice_id' => isset($invoice_id) ? $invoice_id : ''
+                'invoice_id' => isset($invoice_id) ? $invoice_id : '',
+                'data' => 2
             );
 
             $inv_data = $invoice->getInvInfoByWF($workflow_id);
@@ -124,7 +126,8 @@
                 'creditNo' => isset($creditNo) ? $creditNo : '',
                 'vehicleNo' => $vehicleNo,
                 'sessionID' => $sessionID,
-                'invoice_id' => isset($invoice_id) ? $invoice_id : ''
+                'invoice_id' => isset($invoice_id) ? $invoice_id : '',
+                'data' => 3
             );
 
             $inv_data = $invoice->getInvInfoByWF($workflow_id);
