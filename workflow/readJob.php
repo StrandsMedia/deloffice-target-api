@@ -113,13 +113,15 @@
                 $detlines = $details->getPaperRangeRecs($range, $paperBrand, $job_arr['vehicle']);
 
                 foreach ($invlines as $line) {
+                    // echo json_encode($line);
                     $custdata = $customer->getCustDetails(+$line['data'], +$line['cust_id']);
                     $line['company_name'] = $custdata['company_name'];
                 }
 
-                foreach ($detlines as $line) {
-                    $custdata = $customer->getCustDetails(+$line['data'], +$line['cust_id']);
-                    $line['company_name'] = $custdata['company_name'];
+                foreach ($detlines as $line2) {
+                    // echo json_encode($line);
+                    $custdata = $customer->getCustDetails(+$line2['data'], +$line2['cust_id']);
+                    $line2['company_name'] = $custdata['company_name'];
                 }
 
                 $paper_item = array(

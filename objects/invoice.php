@@ -520,7 +520,8 @@
                         'deliveryDate' => $deliveryDate,
                         'qty' => $qty,
                         'des2' => $des2,
-                        'des3' => $des3
+                        'des3' => $des3,
+                        'data' => $data
                     );
 
                     array_push($arr, $arr_item);

@@ -450,7 +450,7 @@
 
             $stmt = $this->conn->prepare($query);
 
-            $stmt->bindParam(1, $this->cust_id);
+            $stmt->bindParam(1, $cust_id);
 
             $stmt->execute();
 

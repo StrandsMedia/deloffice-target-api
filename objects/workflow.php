@@ -1446,7 +1446,8 @@
                         'urgent' => $urgent,
                         'deliveryDate' => $deliveryDate,
                         'qty' => $qty,
-                        'brand' => $row['brand']
+                        'brand' => $row['brand'],
+                        'data' => $data
                     );
 
                     array_push($arr, $arr_item);
