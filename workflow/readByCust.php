@@ -21,6 +21,7 @@
     $tender = new Tender($db);
 
     $workflow->cust_id = isset($_GET['s']) ? $_GET['s'] : die();
+    $workflow->data = isset($_GET['d']) ? $_GET['d'] : die();
     $printing->custid = isset($_GET['s']) ? $_GET['s'] : die();
     $tender->cust_id = isset($_GET['s']) ? $_GET['s'] : die();
 

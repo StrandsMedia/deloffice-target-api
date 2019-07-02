@@ -468,19 +468,17 @@
             $brandsearch = "%" . $brandsearch . "%";
 
             $query = "SELECT
-                        a.workflow_id, a.status, b.cust_id, d.company_name, b.invoice_no,
+                        a.workflow_id, a.status, b.cust_id, a.data, b.invoice_no,
                         b.comments, b.delivery_status, b.region, b.vehicle, b.urgent, b.deliveryDate, c.qty,
                         f.des2, f.des3
                     FROM
-                        workflow a, workflow_delivery b, {$this->table_name} c, del_cust d, invoice e, products f
+                        workflow a, workflow_delivery b, {$this->table_name} c, invoice e, products f
                     WHERE
                         a.workflow_id = b.workflow_id
                     AND
                         c.invoice_id = e.invoice_id
                     AND
                         a.workflow_id = e.workflow_id
-                    AND
-                        b.cust_id = d.cust_id
                     AND
                         f.p_id = c.p_id
                     AND
@@ -511,7 +509,7 @@
                         'workflow_id' => $workflow_id,
                         'status' => $status,
                         'cust_id' => $cust_id,
-                        'company_name' => $company_name,
+                        // 'company_name' => $company_name,
                         'invoice_no' => $invoice_no,
                         'comments' => $comments,
                         'delivery_status' => $delivery_status,
@@ -532,7 +530,23 @@
             return $arr;
         }
 
-        function getPaperRange($range, $brand, $vehicle) {
+        function getPaperRange($range, $brand, $vehicle, $data) {
+            $table = "";
+            $condition = "";
+            switch ($data) {
+                case 1:
+                    $table = 'del_cust';
+                    $condition = " AND a.data = 1 ";
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    $condition = " AND a.data = 2 ";
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    $condition = " AND a.data = 3 ";
+                    break;
+            }
             $array = explode(' ', $brand);
             $brandsearch = $array[0] . ' ';
             if (isset($array[1])) {
@@ -548,7 +562,7 @@
                         b.comments, b.delivery_status, b.region, b.vehicle, b.urgent, b.deliveryDate, c.qty,
                         f.des2, f.des3
                     FROM
-                        workflow a, workflow_delivery b, {$this->table_name} c, del_cust d, invoice e, products f
+                        workflow a, workflow_delivery b, {$this->table_name} c, {$table} d, invoice e, products f
                     WHERE
                         a.workflow_id = b.workflow_id
                     AND
@@ -562,7 +576,7 @@
                     AND
                         e.workflow_id IN $range
                     AND
-                        f.des3 LIKE '$brandsearch'
+                        f.des3 LIKE '$brandsearch'{$condition}
                     AND
                         b.vehicle = '$vehicle';";
 

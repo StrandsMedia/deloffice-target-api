@@ -429,6 +429,35 @@
 
             return false;
         }
+
+        // Get Details
+
+        function getCustDetails($data, $cust_id) {
+            $table = "";
+            switch ($data) {
+                case 1:
+                    $table = 'del_cust';
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    break;
+            }
+
+            $query = "SELECT * FROM {$table} WHERE cust_id = ? LIMIT 0,1;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->cust_id);
+
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row;
+        }
     }
 
     class DelCustomer extends Customer {

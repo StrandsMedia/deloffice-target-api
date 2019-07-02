@@ -107,7 +107,7 @@
                     $condition = " AND a.status IN (6, 9, 8) ";
                     break;
             }
-            $query = "SELECT b.cust_id, b.company_name, a.workflow_id, a.time, a.status, a.urgent, a.cust_id, a.orderNo, a.purchase, a.invoiceNo, a.vehicleNo, a.sessionID, b.customerCode, a.invoice_id FROM {$table} a, del_cust b WHERE b.cust_id = a.cust_id AND a.status <> 0 {$condition}{$condition2} ORDER BY a.time DESC";
+            $query = "SELECT b.cust_id, b.company_name, a.workflow_id, a.time, a.status, a.urgent, a.cust_id, a.orderNo, a.purchase, a.invoiceNo, a.vehicleNo, a.sessionID, b.customerCode, a.invoice_id FROM {$this->table_name} a, {$table} b WHERE b.cust_id = a.cust_id AND a.status <> 0 {$condition}{$condition2} ORDER BY a.time DESC";
 
             $stmt = $this->conn->prepare($query);
 
@@ -246,7 +246,7 @@
             $query = "SELECT
                         a.invoiceNo, c.step, b.company_name, a.workflow_id, d.jobID, a.status
                     FROM
-                        {$this->table_name} a, del_cust b, workflow_steps c, workflow_delivery d
+                        {$this->table_name} a, {$table} b, workflow_steps c, workflow_delivery d
                     WHERE
                         a.cust_id = b.cust_id
                     AND
@@ -275,8 +275,21 @@
         
         // Read by Status
 
-        function readByStatus() {
-            $query = "SELECT a.company_name, b.*, c.purchase as purchaseIns FROM del_cust a, {$this->table_name} b, workflow_delivery c WHERE a.cust_id = b.cust_id AND b.workflow_id = c.workflow_id AND b.status = ? ORDER BY b.workflow_id DESC LIMIT 50;";
+        function readByStatus($data) {
+            $table = "";
+            switch ($data) {
+                case 1:
+                    $table = 'del_cust';
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    break;
+            }
+            
+            $query = "SELECT a.company_name, b.*, c.purchase as purchaseIns FROM {$table} a, {$this->table_name} b, workflow_delivery c WHERE a.cust_id = b.cust_id AND b.workflow_id = c.workflow_id AND b.status = ? ORDER BY b.workflow_id DESC LIMIT 50;";
 
             $stmt = $this->conn->prepare($query);
 
@@ -290,10 +303,23 @@
         // Read by Customer
 
         function readByCust() {
+            $table = "";
+            switch ($this->data) {
+                case 1:
+                    $table = 'del_cust';
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    break;
+            }
+
             $query = "SELECT
                         a.workflow_id, a.time, b.cust_id, b.company_name, c.step
                     FROM
-                        {$this->table_name} a, del_cust b, workflow_steps c
+                        {$this->table_name} a, {$table} b, workflow_steps c
                     WHERE
                         a.status = c.step_id
                     AND
@@ -301,7 +327,7 @@
                     AND
                         a.cust_id = b.cust_id
                     AND
-                        a.cust_id = ? 
+                        a.cust_id = ?
                     ORDER BY workflow_id DESC
                     LIMIT 10;";
 
@@ -316,10 +342,23 @@
 
         // Delivery Session List to Push
 
-        function goodsReady() {
+        function goodsReady($data) {
+            $table = "";
+            switch ($data) {
+                case 1:
+                    $table = 'del_cust';
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    break;
+            }
+
             $query = "SELECT
                 b.cust_id, b.company_name, a.workflow_id, a.time, a.status, a.urgent, a.cust_id, a.orderNo, a.purchase, a.invoiceNo, a.vehicleNo, a.sessionID
-            FROM " . $this->table_name . " a, del_cust b 
+            FROM " . $this->table_name . " a, {$table} b 
             WHERE b.cust_id = a.cust_id 
             AND a.status <> 0 
             AND a.status = '7' 
@@ -870,6 +909,15 @@
             $this->conn = $db;
         }
 
+        public function array_sort_by_column(&$arr, $col, $dir = SORT_DESC) {
+            $sort_col = array();
+            foreach($arr as $key => $row) {
+                $sort_col[$key] = $row[$col];
+            }
+
+            array_multisort($sort_col, $dir, $arr);
+        }
+
         function createDelivery() {
             $query = "INSERT INTO
                         {$this->table_name}
@@ -895,7 +943,20 @@
 
         // Delivery Archive
 
-        function readArchive() {
+        function readArchive($data) {
+            $table = "";
+            switch ($data) {
+                case 1:
+                    $table = 'del_cust';
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    break;
+            }
+
             $condition = "";
 
             if (isset($this->date1) && isset($this->date2)) {
@@ -914,7 +975,7 @@
                 $condition = " AND a.company_name LIKE {$company_name}";
             }
 
-            $query = "SELECT a.company_name, b.*, c.status FROM del_cust a, {$this->table_name} b, workflow c WHERE a.cust_id = b.cust_id AND b.workflow_id = c.workflow_id AND b.invoice_no <> '' AND (b.delivery_status = '17' OR c.status = '17') {$condition} ORDER BY b.workflow_id DESC;";
+            $query = "SELECT a.company_name, b.*, c.status FROM {$table} a, {$this->table_name} b, workflow c WHERE a.cust_id = b.cust_id AND b.workflow_id = c.workflow_id AND b.invoice_no <> '' AND (b.delivery_status = '17' OR c.status = '17') {$condition} ORDER BY b.workflow_id DESC;";
 
             $stmt = $this->conn->prepare($query);
 
@@ -926,13 +987,10 @@
         function readJob() {
             $query = "SELECT
                         a.workflow_id, a.jobID, a.cust_id, a.invoice_no, a.comments, a.vehicle, a.time, a.delivery_status,
-                        b.company_name, b.address, b.tel,
-                        c.status, d.step
+                        c.status, d.step, c.data
                     FROM
-                        {$this->table_name} a, del_cust b, workflow c, workflow_steps d
+                        {$this->table_name} a, workflow c, workflow_steps d
                     WHERE
-                        a.cust_id = b.cust_id
-                    AND
                         a.workflow_id = c.workflow_id
                     AND
                         c.status != 0
@@ -941,7 +999,7 @@
                     AND
                         a.jobID = :jobID
                     ORDER BY
-                        time ASC, company_name ASC;";
+                        time ASC;";
                     
             $stmt = $this->conn->prepare($query);
 
@@ -1291,8 +1349,23 @@
             return false;
         }
 
-        function getPaperRange($range, $brand, $vehicle) {
-
+        function getPaperRange($range, $brand, $vehicle, $data) {
+            $table = "";
+            $condition = "";
+            switch ($data) {
+                case 1:
+                    $table = 'del_cust';
+                    $condition = " AND a.data = 1 ";
+                    break;
+                case 2:
+                    $table = 'rns_cust';
+                    $condition = " AND a.data = 2 ";
+                    break;
+                case 3:
+                    $table = 'pnp_cust';
+                    $condition = " AND a.data = 3 ";
+                    break;
+            }
             $total = 0;
             $testsum = 0;
 
@@ -1301,7 +1374,7 @@
                         b.comments, b.delivery_status, b.region, b.vehicle,
                         b.urgent, b.deliveryDate, c.qty, c.format, c.brand
                     FROM
-                        workflow a, workflow_delivery b, {$this->table_name} c, del_cust d
+                        workflow a, workflow_delivery b, {$this->table_name} c, {$table} d
                     WHERE
                         a.workflow_id = b.workflow_id
                     AND
@@ -1311,7 +1384,7 @@
                     AND
                         c.workflow_id IN $range
                     AND
-                        c.brand = '$brand'
+                        c.brand = '$brand'{$condition}
                     AND
                         b.vehicle = '$vehicle';";
 
@@ -1333,17 +1406,15 @@
 
         function getPaperRangeRecs($range, $brand, $vehicle) {
             $query = "SELECT
-                        c.details_id, a.workflow_id, a.status, b.cust_id, d.company_name, b.invoice_no,
+                        c.details_id, a.workflow_id, a.status, a.data, b.cust_id, b.invoice_no,
                         b.comments, b.delivery_status, b.region, b.vehicle,
                         b.urgent, b.deliveryDate, c.qty, c.format, c.brand
                     FROM
-                        workflow a, workflow_delivery b, {$this->table_name} c, del_cust d
+                        workflow a, workflow_delivery b, {$this->table_name} c
                     WHERE
                         a.workflow_id = b.workflow_id
                     AND
                         a.workflow_id = c.workflow_id
-                    AND
-                        b.cust_id = d.cust_id
                     AND
                         c.workflow_id IN $range
                     AND
@@ -1365,7 +1436,7 @@
                         'workflow_id' => $workflow_id,
                         'status' => $status,
                         'cust_id' => $cust_id,
-                        'company_name' => $company_name,
+                        // 'company_name' => $company_name,
                         'invoice_no' => $invoice_no,
                         'comments' => $comments,
                         'delivery_status' => $delivery_status,

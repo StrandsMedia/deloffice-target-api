@@ -6,11 +6,14 @@
     header('Content-Type: application/json');
 
     include_once '../config/db.php';
+    include_once '../objects/customer.php';
     include_once '../objects/workflow.php';
     include_once '../objects/invoice.php';
 
     $database = new Database();
     $db = $database->getConnection();
+
+    $customer = new Customer($db);
 
     $delivery = new WorkflowDelivery($db);
     $details = new WorkflowDetails($db);
@@ -23,6 +26,7 @@
     $session->sessionID = isset($_GET['id']) ? $_GET['id'] : die();
 
     $stmt = $delivery->readJob();
+
     $stmt2 = $session->readSesh();
     $stmt3 = $paper->get();
 
@@ -36,6 +40,7 @@
         $i = 0;
         $i2 = 0;
         $range = '(';
+
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             extract($row);
 
@@ -61,13 +66,17 @@
                 'comments' => $comments,
                 'vehicle' => $vehicle,
                 'delivery_status' => $delivery_status,
-                'company_name' => $company_name,
-                'address' => str_replace('\n', '', $address),
-                'tel' => $tel,
                 'status' => $status,
                 'step' => $step,
-                'time' => $time
+                'time' => $time,
+                'data' => $data
             );
+
+            $custdata = $customer->getCustDetails($data, $cust_id);
+
+            $job_item['company_name'] = $custdata['company_name'];
+            $job_item['address'] = str_replace('\n', '', $custdata['address']);
+            $job_item['tel'] = $custdata['tel'];
 
             $job_item['product'] = $details->getProducts($workflow_id);
 
@@ -91,12 +100,27 @@
                 $paper_sum = 0;
                 extract($row3);
 
-                $paper_sum += $details->getPaperRange($range, $paperBrand, $job_arr['vehicle']);
+                $paper_sum += $details->getPaperRange($range, $paperBrand, $job_arr['vehicle'], 1);
+                $paper_sum += $details->getPaperRange($range, $paperBrand, $job_arr['vehicle'], 2);
+                $paper_sum += $details->getPaperRange($range, $paperBrand, $job_arr['vehicle'], 3);
 
-                $paper_sum += $lines->getPaperRange($range, $paperBrand, $job_arr['vehicle']);
+                $paper_sum += $lines->getPaperRange($range, $paperBrand, $job_arr['vehicle'], 1);
+                $paper_sum += $lines->getPaperRange($range, $paperBrand, $job_arr['vehicle'], 2);
+                $paper_sum += $lines->getPaperRange($range, $paperBrand, $job_arr['vehicle'], 3);
 
                 $invlines = $lines->getPaperRangeRecs($range, $paperBrand, $job_arr['vehicle']);
+
                 $detlines = $details->getPaperRangeRecs($range, $paperBrand, $job_arr['vehicle']);
+
+                foreach ($invlines as $line) {
+                    $custdata = $customer->getCustDetails(+$line['data'], +$line['cust_id']);
+                    $line['company_name'] = $custdata['company_name'];
+                }
+
+                foreach ($detlines as $line) {
+                    $custdata = $customer->getCustDetails(+$line['data'], +$line['cust_id']);
+                    $line['company_name'] = $custdata['company_name'];
+                }
 
                 $paper_item = array(
                     'brand' => $paperBrand,
