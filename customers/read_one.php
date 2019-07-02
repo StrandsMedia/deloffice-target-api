@@ -11,7 +11,19 @@
     $database = new Database();
     $db = $database->getConnection();
 
-    $customer = new DelCustomer($db);
+    $data = isset($_GET['d']) ? $_GET['d'] : die();
+
+    switch (+$data) {
+        case 1:
+            $customer = new DelCustomer($db);
+            break;
+        case 2:
+            $customer = new RnsCustomer($db);
+            break;
+        case 3:
+            $customer = new PnpCustomer($db);
+            break;
+    }
 
     $customer->cust_id = isset($_GET['id']) ? $_GET['id'] : die();
 
