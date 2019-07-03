@@ -261,4 +261,108 @@
             return false;
         }
     }
+
+    class Printer {
+        private $conn;
+        private $table_name = 'printers';
+
+        public $printerId;
+        public $printerName;
+        public $active;
+        public $createdAt;
+        public $updatedAt;
+
+        public function __construct($db) {
+            $this->conn = $db;
+        }
+
+        function createPrinter() {
+            $query = "INSERT INTO
+                            {$this->table_name}
+                    SET
+                        printerName = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->printerName, PDO::PARAM_STR);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        function readPrinters() {
+            $query = "SELECT 
+                        *
+                    FROM
+                        {$this->table_name}
+                    ORDER BY
+                        printerName ASC;";
+            
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->execute();
+
+            return $stmt;
+        }
+    }
+
+    class InkReport {
+        private $conn;
+        private $table_name = 'ink_report';
+        
+        public $reportId;
+        public $printerId;
+        public $inkChangedType;
+        public $createdAt;
+        public $updatedAt;
+
+        public function __construct($db) {
+            $this->conn = $db;
+        }
+
+        function createEntry() {
+            $query = "INSERT INTO
+                            {$this->table_name}
+                    SET
+                        printerId = ?,
+                        inkChangedType = ?,
+                        createdAt = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            if (!isset($this->createdAt)) {
+                $this->createdAt = date('Y-m-d H:i:s');
+            }
+
+            $stmt->bindParam(1, $this->printerId, PDO::PARAM_INT);
+            $stmt->bindParam(2, $this->inkChangedType, PDO::PARAM_STR);
+            $stmt->bindParam(3, $this->createdAt, PDO::PARAM_STR);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        function readEntries() {
+            $query = "SELECT
+                        a.*, b.printerName
+                    FROM 
+                        {$this->table_name} a, printers b
+                    WHERE
+                        a.printerId = b.printerId
+                    ORDER BY
+                        createdAt DESC;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->execute();
+
+            return $stmt;
+        }
+    }
 ?>

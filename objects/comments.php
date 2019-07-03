@@ -82,7 +82,8 @@
                         cust_id = :cust_id,
                         comment = :comment,
                         date = :date,
-                        user = :user;";
+                        user = :user,
+                        data = :data;";
             
             $stmt = $this->conn->prepare($query);
 
@@ -92,6 +93,7 @@
             $stmt->bindParam(":comment", $this->comment);
             $stmt->bindParam(":date", $this->date);
             $stmt->bindParam(":user", $this->user);
+            $stmt->bindParam(":data", $this->data);
 
             if ($stmt->execute()) {
                 return true;

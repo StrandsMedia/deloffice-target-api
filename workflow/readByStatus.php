@@ -43,7 +43,9 @@
                 'urgent' => $urgent,
                 'vehicleNo' => $vehicleNo,
                 'workflow_id' => $workflow_id,
-                'purchaseIns' => $purchaseIns
+                'purchaseIns' => $purchaseIns,
+                'data' => 1,
+                'company' => 'DEL'
             );
 
             array_push($temp_array, $workflow_item);
@@ -66,7 +68,9 @@
                 'urgent' => $urgent,
                 'vehicleNo' => $vehicleNo,
                 'workflow_id' => $workflow_id,
-                'purchaseIns' => $purchaseIns
+                'purchaseIns' => $purchaseIns,
+                'data' => 2,
+                'company' => 'RNS'
             );
 
             array_push($temp_array, $workflow_item2);
@@ -89,7 +93,9 @@
                 'urgent' => $urgent,
                 'vehicleNo' => $vehicleNo,
                 'workflow_id' => $workflow_id,
-                'purchaseIns' => $purchaseIns
+                'purchaseIns' => $purchaseIns,
+                'data' => 3,
+                'company' => 'PNP'
             );
 
             array_push($temp_array, $workflow_item3);

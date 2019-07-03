@@ -33,6 +33,7 @@
                 $comment->comment = $data->comment;
                 $comment->date = $data->date;
                 $comment->user = $data->user_id;
+                $comment->data = $data->data;
                 if ($comment->insertComment()) {
                     http_response_code(201);
                     echo json_encode(array(
