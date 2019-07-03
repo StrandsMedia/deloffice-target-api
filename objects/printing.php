@@ -26,6 +26,7 @@
         public $deliverydate;
         public $dimensions;
         public $ppunit;
+        public $data;
 
         public $company_name;
 
@@ -58,7 +59,8 @@
                         supervisedby = :supervisedby,
                         deliverydate = :deliverydate,
                         dimensions = :dimensions,
-                        ppunit = :ppunit";
+                        ppunit = :ppunit,
+                        data = :data";
             
             $stmt = $this->conn->prepare($query);
             
@@ -107,6 +109,7 @@
             $stmt->bindParam(':deliverydate', $this->deliverydate, PDO::PARAM_STR);
             $stmt->bindParam(':dimensions', $this->dimensions);
             $stmt->bindParam(':ppunit', $this->ppunit);
+            $stmt->bindParam(':data', $this->data);
 
             if ($stmt->execute()) {
                 return true;
@@ -119,28 +122,27 @@
             $condition = "";
 
             if (isset($this->status)) {
-                $condition = "AND a.status = {$this->status}";
+                $condition = " WHERE a.status = {$this->status}";
             }
 
-            if (isset($this->company_name)) {
-                $company_name = htmlspecialchars(strip_tags($this->company_name));
-                $company_name = "'%{$company_name}%'";
-                $condition = "AND b.company_name LIKE {$company_name}";
-            }
+            // if (isset($this->company_name)) {
+            //     $company_name = htmlspecialchars(strip_tags($this->company_name));
+            //     $company_name = "'%{$company_name}%'";
+            //     $condition = "WHERE b.company_name LIKE {$company_name}";
+            // }
 
             if (isset($this->product)) {
                 $product = htmlspecialchars(strip_tags($this->product));
                 $product = "'%{$product}%'";
-                $condition = "AND a.product LIKE {$product}";
+                $condition = " WHERE a.product LIKE {$product}";
             }
             
 
             $query = "SELECT
-                        a.*, b.company_name
+                        a.*, a.data
                     FROM
-                        {$this->table_name} a, del_cust b 
-                    WHERE
-                        a.custid = b.cust_id {$condition}
+                        {$this->table_name} a
+                        {$condition}
                     ORDER BY
                         a.status ASC, a.job_id DESC LIMIT 50;";
 
@@ -157,12 +159,10 @@
 
         function readByCust() {
             $query = "SELECT
-                        a.*, b.company_name
+                        a.*, a.data
                     FROM
-                        {$this->table_name} a, del_cust b
+                        {$this->table_name} a
                     WHERE
-                        a.custid = b.cust_id
-                    AND
                         a.custid = ?
                     ORDER BY
                         a.job_id DESC LIMIT 5;";

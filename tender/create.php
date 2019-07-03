@@ -31,6 +31,7 @@
             $tender->result = $data->result;
             $tender->comments = $data->comments;
             $tender->status = $data->status;
+            $tender->data = $data->data;
     
             if ($tender->create()) {
                 http_response_code(200);

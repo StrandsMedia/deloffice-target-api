@@ -7,6 +7,7 @@
 
     include_once '../config/db.php';
     include_once '../objects/tender.php';
+    include_once '../objects/customer.php';
 
     $database = new Database();
     $db = $database->getConnection();
@@ -16,11 +17,11 @@
 
     $data = json_decode(file_get_contents('php://input'));
 
-    //$customer = new Customer($db);
+    $customer = new Customer($db);
 
     $tender->status = isset($data->status) ? $data->status : null;
     
-    $tender->company_name = isset($data->company_name) ? $data->company_name : null;
+    // $tender->company_name = isset($data->company_name) ? $data->company_name : null;
 
     $stmt = $tender->read();
     $num = $stmt->rowCount();
@@ -50,13 +51,13 @@
                 'status' => $status,
                 'createdAt' => $createdAt,
                 'updatedAt' => $updatedAt,
-                'company_name' => $company_name
-                //'data' => $data
+                // 'company_name' => $company_name,
+                'data' => $data
             );
 
-            //$custdata = $customer->getCustDetails($data, $cust_id);
+            $custdata = $customer->getCustDetails($data, $cust_id);
 
-            //$tender_item['company_name'] = $custdata['company_name'];
+            $tender_item['company_name'] = $custdata['company_name'];
 
             if (isset($tid)) {
                 $attach->getPath($tid);
@@ -66,6 +67,12 @@
             }
 
             array_push($tender_arr['records'], $tender_item);
+        }
+
+        if (isset($data->company_name)) {
+            array_filter($tender_arr['records'], function ($item) {
+                return (strpos($item['company_name'], $data->company_name) !== false);
+            });
         }
 
         echo json_encode($tender_arr);

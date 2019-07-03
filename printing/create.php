@@ -39,6 +39,7 @@
             $printing->deliverydate = $data->deliverydate;
             $printing->dimensions = $data->dimensions;
             $printing->ppunit = $data->ppunit;
+            $printing->data = $data->data;
 
             if ($printing->create()) {
                 http_response_code(201);

@@ -7,6 +7,7 @@
 
     include_once '../config/db.php';
     include_once '../objects/printing.php';
+    include_once '../objects/customer.php';
 
     $database = new Database();
     $db = $database->getConnection();
@@ -14,6 +15,8 @@
     $printing = new Printing($db);
 
     $data = json_decode(file_get_contents('php://input'));
+
+    $customer = new Customer($db);
 
     $printing->status = isset($data->status) ? $data->status : null;
     
@@ -55,10 +58,21 @@
                 'deliverydate' => $deliverydate,
                 'dimensions' => $dimensions,
                 'ppunit' => $ppunit,
-                'company_name' => $company_name
+                // 'company_name' => $company_name
+                'data' => $data
             );
 
+            $custdata = $customer->getCustDetails($data, $custid);
+
+            $printing_item['company_name'] = $custdata['company_name'];
+
             array_push($printing_arr['records'], $printing_item);
+        }
+
+        if (isset($data->company_name)) {
+            array_filter($printing_arr['records'], function ($item) {
+                return strpos($item['company_name'], $data->company_name) !== false;
+            });
         }
 
         echo json_encode($printing_arr);

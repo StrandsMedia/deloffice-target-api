@@ -45,7 +45,8 @@
                         attachment = :attachment,
                         result = :result,
                         comments = :comments,
-                        status = :status;";
+                        status = :status,
+                        data = :data;";
 
             $stmt = $this->conn->prepare($query);
 
@@ -67,6 +68,7 @@
             $stmt->bindParam(':result', $this->result);
             $stmt->bindParam(':comments', $this->comments);
             $stmt->bindParam(':status', $this->status, PDO::PARAM_INT, 1);
+            $stmt->bindParam(':data', $this->data);
 
             if ($stmt->execute()) {
                 return true;
@@ -79,16 +81,10 @@
             $condition = "";
 
             if (isset($this->status)) {
-                $condition = "AND a.status = {$this->status}";
+                $condition = " WHERE a.status = {$this->status}";
             }
 
-            if (isset($this->company_name)) {
-                $company_name = htmlspecialchars(strip_tags($this->company_name));
-                $company_name = "'%{$company_name}%'";
-                $condition = "AND b.company_name LIKE {$company_name}";
-            }
-
-            $query = "SELECT a.*, a.data FROM {$this->table_name} a WHERE {$condition} ORDER BY a.schedule LIMIT 50;";
+            $query = "SELECT a.*, a.data FROM {$this->table_name} a {$condition} ORDER BY a.schedule LIMIT 50;";
 
             $stmt = $this->conn->prepare($query);
 
