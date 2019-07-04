@@ -5,13 +5,15 @@
     header('Access-Control-Max-Age: 3600');
     header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
 
-    include_once '../config/db.php';
-    include_once '../objects/printing.php';
+    include_once '../../config/db.php';
+    include_once '../../objects/printing.php';
 
     $database = new Database();
     $db = $database->getConnection();
 
     $ink_report = new InkReport($db);
+
+    $data = json_decode(file_get_contents("php://input"));
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($data)) {
@@ -35,7 +37,7 @@
         } else {
             http_response_code(400);
             echo json_encode(array(
-                'message' => 'Unable to create product. Data is incomplete or not found.'
+                'message' => 'Unable to create entry. Data is incomplete or not found.'
             ));
         }
     }

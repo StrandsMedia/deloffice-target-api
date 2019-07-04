@@ -5,15 +5,15 @@
     header('Access-Control-Allow-Credentials: true');
     header('Content-Type: application/json');
 
-    include_once '../config/db.php';
-    include_once '../objects/printing.php';
+    include_once '../../config/db.php';
+    include_once '../../objects/printing.php';
 
     $database = new Database();
     $db = $database->getConnection();
 
     $ink_report = new InkReport($db);
 
-    $stmt = $ink_report->read();
+    $stmt = $ink_report->readEntries();
     $num = $stmt->rowCount();
 
     if ($num > 0) {
@@ -26,7 +26,7 @@
             $inkReport_item = array(
                 'reportId' => $reportId,
                 'printerId' => $printerId,
-                'printerName' => $printerName
+                //'printerName' => $printerName
                 'inkChangedType' => $inkChangedType,
                 'createdAt' => $createdAt,
                 'updatedAt' => $updatedAt

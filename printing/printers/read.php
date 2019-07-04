@@ -5,15 +5,15 @@
     header('Access-Control-Allow-Credentials: true');
     header('Content-Type: application/json');
 
-    include_once '../config/db.php';
-    include_once '../objects/printing.php';
+    include_once '../../config/db.php';
+    include_once '../../objects/printing.php';
 
     $database = new Database();
     $db = $database->getConnection();
 
     $printers = new Printer($db);
 
-    $stmt = $printers->read();
+    $stmt = $printers->readPrinters();
     $num = $stmt->rowCount();
 
     if ($num > 0) {

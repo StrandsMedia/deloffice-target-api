@@ -277,20 +277,22 @@
         }
 
         function createPrinter() {
-            $query = "INSERT INTO
+            $query = "INSERT
                             {$this->table_name}
                     SET
-                        printerName = ?;";
+                        `printerName`=:printerName, `active`=:active;";
 
             $stmt = $this->conn->prepare($query);
 
-            $stmt->bindParam(1, $this->printerName, PDO::PARAM_STR);
+            $stmt->bindParam(":printerName", $this->printerName);
+            $stmt->bindParam(":active", $this->active);
+            // $stmt->bindParam(1, $this->printerName, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
                 return true;
-            } else {
-                return false;
-            }
+            };
+
+            return false;
         }
         
         function readPrinters() {
@@ -324,12 +326,12 @@
         }
 
         function createEntry() {
-            $query = "INSERT INTO
+            $query = "INSERT 
                             {$this->table_name}
                     SET
-                        printerId = ?,
-                        inkChangedType = ?,
-                        createdAt = ?;";
+                        `printerId`=:printerId,
+                        `inkChangedType`=:inkChangedType,
+                        `createdAt`=:createdAt;";
 
             $stmt = $this->conn->prepare($query);
 
@@ -337,15 +339,15 @@
                 $this->createdAt = date('Y-m-d H:i:s');
             }
 
-            $stmt->bindParam(1, $this->printerId, PDO::PARAM_INT);
-            $stmt->bindParam(2, $this->inkChangedType, PDO::PARAM_STR);
-            $stmt->bindParam(3, $this->createdAt, PDO::PARAM_STR);
+            $stmt->bindParam(":printerId", $this->printerId, PDO::PARAM_INT);
+            $stmt->bindParam(":inkChangedType", $this->inkChangedType, PDO::PARAM_STR);
+            $stmt->bindParam(":createdAt", $this->createdAt, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
                 return true;
-            } else {
-                return false;
-            }
+            };
+
+            return false;
         }
         
         function readEntries() {
