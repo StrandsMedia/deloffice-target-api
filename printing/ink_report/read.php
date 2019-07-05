@@ -26,7 +26,7 @@
             $inkReport_item = array(
                 'reportId' => $reportId,
                 'printerId' => $printerId,
-                //'printerName' => $printerName
+                'printerName' => $printerName,
                 'inkChangedType' => $inkChangedType,
                 'createdAt' => $createdAt,
                 'updatedAt' => $updatedAt
