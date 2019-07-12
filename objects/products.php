@@ -418,6 +418,29 @@
             return $stmt;
         }
 
+        function searchOne($keywords) {
+            $query = "SELECT
+                        *
+                    FROM
+                        {$this->table_name}
+                    WHERE
+                        p_id LIKE ?
+                    ORDER BY
+                        p_id DESC
+                    LIMIT 0,1;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $keywords = htmlspecialchars(strip_tags($keywords));
+            $keywords = "%{$keywords}%";
+
+            $stmt->bindParam(1, $keywords, PDO::PARAM_STR);
+
+            $stmt->execute();
+
+            return $stmt;
+        }
+
         function isProduct() {
             $query = "SELECT
                         *

@@ -70,7 +70,8 @@
                 'debt_id' => $debt_id,
                 'status' => $status,
                 'createdAt' => $createdAt,
-                'updatedAt' => $updatedAt
+                'updatedAt' => $updatedAt,
+                'data' => $data
             );
 
             if (isset($data)) {

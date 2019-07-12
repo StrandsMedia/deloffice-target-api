@@ -33,6 +33,12 @@
             array_multisort($sort_col, $dir, $arr);
         }
 
+        // public function resort_array($array) {
+        //     foreach() {
+
+        //     }
+        // }
+
         // Create
         
         function create($num) {
@@ -41,6 +47,7 @@
                     $query = "INSERT INTO
                                 {$this->table_name}
                             SET
+                                data = :data,
                                 status = :status,
                                 cust_id = :cust_id;";
                     break;
@@ -48,6 +55,7 @@
                     $query = "INSERT INTO
                                 {$this->table_name}
                             SET
+                                data = :data,
                                 status = :status,
                                 cust_id = :cust_id,
                                 orderNo = :orderNo;";
@@ -57,6 +65,7 @@
 
             $stmt->bindParam(':status', $this->status, PDO::PARAM_INT);
             $stmt->bindParam(':cust_id', $this->cust_id, PDO::PARAM_INT);
+            $stmt->bindParam(':data', $this->data, PDO::PARAM_INT);
 
             if ($num === 1) {
                 $stmt->bindParam(':orderNo', $this->orderNo, PDO::PARAM_STR);

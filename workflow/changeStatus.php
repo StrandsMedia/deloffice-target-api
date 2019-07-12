@@ -23,6 +23,7 @@
         if (isset($data)) {
             $history->user = $data->user;
             $session->user = $data->user;
+            $workflow->data = $data->data;
             $step = $data->step;
             switch ($step) {
                 case 1:
