@@ -44,6 +44,11 @@
                 'data' => $data
             );
 
+            if (isset($_GET['s'])) {
+                $comment_item['interactionType'] = $interactionType;
+                $comment_item['interactionOutcome'] = $interactionOutcome;
+            }
+
             $custdata = $customer->getCustDetails($data, $cust_id);
 
             $comment_item['company_name'] = $custdata['company_name'];

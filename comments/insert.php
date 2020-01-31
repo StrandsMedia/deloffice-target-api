@@ -34,6 +34,14 @@
                 $comment->date = $data->date;
                 $comment->user = $data->user_id;
                 $comment->data = $data->data;
+
+                if ($data->step == 1) {
+                    $comment->interactionOutcome = $data->interactionOutcome;
+                    $comment->interactionType = $data->interactionType;
+                }
+                $comment->data = $data->data;
+                $comment->data = $data->data;
+                
                 if ($comment->insertComment()) {
                     http_response_code(201);
                     echo json_encode(array(

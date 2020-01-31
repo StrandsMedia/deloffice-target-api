@@ -8,6 +8,8 @@
     include_once '../config/db.php';
     include_once '../objects/workflow.php';
 
+    include_once '../objects/pastel.php';
+
     $database = new Database();
     $db = $database->getConnection();
 
@@ -24,13 +26,70 @@
             $history->user = $data->user;
             $session->user = $data->user;
             $workflow->data = $data->data;
+
+            switch (+$data->data) {
+                case 1:
+                    $srv_database = new DelServerDatabase();
+                    $srvdb = $srv_database->getConnection();
+                    break;
+                case 2:
+                    $srv_database = new RnsServerDatabase();
+                    $srvdb = $srv_database->getConnection();
+                    break;
+                case 3:
+                    $srv_database = new PnpServerDatabase();
+                    $srvdb = $srv_database->getConnection();
+                    break;
+            }
+            
+            if (isset($srvdb)) {
+                $client = new Client($srvdb);
+                $postar = new PostAR($srvdb);
+            }
+
             $step = $data->step;
             switch ($step) {
                 case 1:
                     if ($data->status == '1') {
                         $workflow->cust_id = $data->cust_id;
+
+                        $credit = "Entry sent to Credit Control.";
+                    
+                        if (isset($srvdb)) {
+                            if (isset($data->customerCode)) {
+                                $link = $client->getDCLink($data->customerCode);
+                                $term = $client->getTerms($data->customerCode);
+
+                                $postar->AccountLink = $link;
+
+                                if ($term !== 6) {
+                                    if ($postar->getOutstanding($term) > 0) {
+                                        $workflow->status = $data->status;
+                                        $workflow->creditCtrl = 1;
+                                        $credit = $credit . ' Account is over terms.';
+                                    } else {
+                                        $workflow->status = $data->status;
+                                        $workflow->creditCtrl = 0;
+                                        $credit = 'Entry processed successfully.';
+                                    }
+                                } else {
+                                    $workflow->status = $data->status;
+                                    $workflow->creditCtrl = 0;
+                                    $credit = 'Entry processed successfully.';
+                                }
+                            } else {
+                                $workflow->status = $data->status;
+                                $workflow->creditCtrl = 1;
+                                $credit = $credit . ' Customer Code Missing.';
+                            }
+                        } else {
+                            $workflow->status = $data->status;
+                            $workflow->creditCtrl = 0;
+                            $credit = 'Entry processed successfully.';
+                        }
+
                         $workflow->status = $data->status;
-                        if ($workflow->create(0)) {
+                        if ($workflow->create(3)) {
                             $lastId = $db->lastInsertId();
 
                             $workflow->workflow_id = $lastId;
@@ -74,7 +133,44 @@
                         $workflow->cust_id = $data->cust_id;
                         $workflow->status = $data->status;
                         $workflow->orderNo = $data->orderNo;
-                        if ($workflow->create(1)) {
+
+                        $credit = "Entry sent to Credit Control.";
+                        
+                        if (isset($srvdb)) {
+                            if (isset($data->customerCode)) {
+                                $link = $client->getDCLink($data->customerCode);
+                                $term = $client->getTerms($data->customerCode);
+
+                                $postar->AccountLink = $link;
+
+                                if ($term !== 6) {
+                                    if ($postar->getOutstanding($term) > 0) {
+                                        $workflow->status = $data->status;
+                                        $workflow->creditCtrl = 1;
+                                        $credit = $credit . ' Account is over terms.';
+                                    } else {
+                                        $workflow->status = $data->status;
+                                        $workflow->creditCtrl = 0;
+                                        $credit = 'Entry processed successfully.';
+                                    }
+                                } else {
+                                    $workflow->status = $data->status;
+                                    $workflow->creditCtrl = 0;
+                                    $credit = 'Entry processed successfully.';
+                                }
+                            } else {
+                                $workflow->status = $data->status;
+                                $workflow->creditCtrl = 1;
+                                $credit = $credit . ' Customer Code Missing.';
+                            }
+                        } else {
+                            $workflow->status = $data->status;
+                            $workflow->creditCtrl = 0;
+                            $credit = 'Entry processed successfully.';
+                        }
+
+
+                        if ($workflow->create(2)) {
                             $lastId = $db->lastInsertId();
                             $workflow->workflow_id = $lastId;
 
@@ -162,24 +258,127 @@
                     }
                     break;
                 case 3:
+                    $credit = "Entry sent to Credit Control.";
+
                     $workflow->workflow_id = $data->workflow_id;
-                    $workflow->status = $data->status;
+
+                    $creditCtrl = $workflow->getCreditCtrlStatus();
+                    
+                    if ($creditCtrl == 3) {
+                        $workflow->status = $data->status;
+                        $workflow->creditCtrl = 3;
+                        $credit = 'Entry processed successfully.';
+                    } else {
+                        if (isset($srvdb)) {
+                            if (isset($data->customerCode)) {
+                                $link = $client->getDCLink($data->customerCode);
+                                $term = $client->getTerms($data->customerCode);
+    
+                                $postar->AccountLink = $link;
+    
+                                if ($term !== 6) {
+                                    if ($postar->getOutstanding($term) > 0) {
+                                        $workflow->status = $data->status;
+                                            $workflow->creditCtrl = 1;
+                                        $credit = $credit . ' Account is over terms.';
+                                    } else {
+                                        $workflow->status = $data->status;
+                                        $workflow->creditCtrl = 0;
+                                        $credit = 'Entry processed successfully.';
+                                    }
+                                } else {
+                                    $workflow->status = $data->status;
+                                    $workflow->creditCtrl = 0;
+                                    $credit = 'Entry processed successfully.';
+                                }
+                            } else {
+                                $workflow->status = $data->status;
+                                $workflow->creditCtrl = 1;
+                                $credit = $credit . ' Customer Code Missing.';
+                            }
+                        } else {
+                            $workflow->status = $data->status;
+                            $workflow->creditCtrl = 0;
+                            $credit = 'Entry processed successfully.';
+                        }
+                    }
+
+                    $workflow->workflow_id = $data->workflow_id;
+                    
                     $workflow->orderNo = $data->orderNo;
-                    if ($workflow->update(0)) {
-                        $delivery->delivery_status = $data->status;
-                        $delivery->workflow_id = $data->workflow_id;
-                        if ($delivery->updateStatus()) {
-                            $history->workflow_id = $data->workflow_id;
-                            $history->step = $data->status;
-                            $history->note = $data->orderNo;
-                            $history->comment = $data->note;
-                            if ($history->insertHistory()) {
-                                $details->workflow_id = $data->workflow_id;
-                                if ($details->parseUpdate($data)) {
+                    if ($workflow->status != 27) {
+                        if ($workflow->update(7)) {
+                            $delivery->delivery_status = $workflow->status;
+                            $delivery->workflow_id = $data->workflow_id;
+                            if ($delivery->updateStatus()) {
+                                $history->workflow_id = $data->workflow_id;
+                                $history->step = $workflow->status;
+                                $history->note = $data->orderNo;
+                                $history->comment = $data->note;
+                                if ($history->insertHistory()) {
+                                    $details->workflow_id = $data->workflow_id;
+                                    if ($details->parseUpdate($data)) {
+                                        echo json_encode(
+                                            array(
+                                                'status' => 'success',
+                                                'message' => 'Entry created successfully.'
+                                            )
+                                        );
+                                    } else {
+                                        $response = array(
+                                            'status' => 'success',
+                                            'message' => $credit
+                                        );
+                                        echo json_encode($response);
+                                    }
+                                } else {
                                     echo json_encode(
                                         array(
-                                            'status' => 'success',
-                                            'message' => 'Entry created successfully.'
+                                            'status' => 'error',
+                                            'message' => 'Unable to update entry.'
+                                        )
+                                    );
+                                }
+                            }
+                        } else {
+                            echo json_encode(
+                                array(
+                                    'status' => 'error',
+                                    'message' => 'Unable to update entry.'
+                                )
+                            );
+                        }
+                    } else {
+                        if ($workflow->update(7)) {
+                            $delivery->delivery_status = $workflow->status;
+                            $delivery->workflow_id = $data->workflow_id;
+                            if ($delivery->updateStatus()) {
+                                $history->workflow_id = $data->workflow_id;
+                                $history->step = $workflow->status;
+                                $history->note = $data->orderNo;
+                                $history->comment = $data->note;
+                                if ($history->insertHistory()) {
+                                    $details->workflow_id = $data->workflow_id;
+                                    if ($details->parseUpdate($data)) {
+                                        echo json_encode(
+                                            array(
+                                                'status' => 'success',
+                                                'message' => 'Entry updated successfully.'
+                                            )
+                                        );
+                                    } else {
+                                        echo json_encode(
+                                            array(
+                                                'status' => 'error',
+                                                'message' => 'Unable to update entry. No products found.'
+                                            )
+                                        );
+                                    }
+                                } else {
+                                    echo json_encode(
+                                        array(
+                                            'status' => 'error',
+                                            'message' => 'Unable to insert history.'
                                         )
                                     );
                                 }
@@ -187,18 +386,18 @@
                                 echo json_encode(
                                     array(
                                         'status' => 'error',
-                                        'message' => 'Unable to update entry.'
+                                        'message' => 'Unable to update delivery status.'
                                     )
                                 );
                             }
+                        } else {
+                            echo json_encode(
+                                array(
+                                    'status' => 'error',
+                                    'message' => 'Unable to update workflow.'
+                                )
+                            );
                         }
-                    } else {
-                        echo json_encode(
-                            array(
-                                'status' => 'error',
-                                'message' => 'Unable to update entry.'
-                            )
-                        );
                     }
                     break;
                 case 4:

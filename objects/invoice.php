@@ -30,6 +30,8 @@
         public $DocTypeID;
         public $invRef;
 
+        public $amendstatus;
+
         public function __construct($db) {
             $this->conn = $db;
         }
@@ -126,6 +128,34 @@
             }
         }
 
+        function getAmendStatus() {
+            $query = "SELECT amendstatus FROM {$this->table_name} WHERE workflow_id = ? LIMIT 0,1;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->workflow_id);
+
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row['amendstatus'];
+        }
+
+        function changeAmendStatus($val) {
+            $query = "UPDATE {$this->table_name} SET amendstatus = {$val} WHERE workflow_id = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->workflow_id);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         function getInvoices($status) {
             $query = "SELECT 
                 a.invoice_id, a.company_name, a.customerCode, a.InvDate, a.InvStatus, a.TotalIncl, a.TotalExcl, a.TotalTax, a.poNumber, a.invNumber, a.workflow_id, a.notes, b.cust_id, c.sales_rep
@@ -151,13 +181,12 @@
 
         function getInvoice() {
             $query = "SELECT 
-                a.*, b.cust_id, b.priceDefault
+                a.*, b.data, b.cust_id, b.status, b.tableId
             FROM 
-                {$this->table_name} a,
-                del_cust b
-            WHERE 
-                a.customerCode = b.customerCode 
-            AND 
+                {$this->table_name} a, workflow b
+            WHERE
+                a.workflow_id = b.workflow_id
+            AND
                 a.invoice_id = ?";
 
             $stmt = $this->conn->prepare($query);
@@ -310,8 +339,152 @@
         public $checked;
         public $verified;
 
+        public $amend;
+        public $purchase;
+        public $transfer;
+
+        public $amendstatus;
+        public $purchasestatus;
+        public $transferstatus;
+
         public function __construct($db) {
             $this->conn = $db;
+        }
+
+        function markStatus($data) {
+            $condition = "";
+            switch ($data) {
+                case 1:
+                    $condition = "amendstatus";
+                    break;
+                case 2:
+                    $condition = "purchasestatus";
+                    break;
+                case 3:
+                    $condition = "transferstatus";
+                    break;
+            }
+            $query = "UPDATE {$this->table_name} SET {$condition} = ? WHERE invlineid = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->amendstatus);
+
+            $stmt->bindParam(2, $this->invlineid);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public function updateStatusAll($data) {
+            $condition = "";
+            $condition2 = "";
+            switch ($data) {
+                case 1:
+                    $condition = "amendstatus";
+                    $condition2 = "amend";
+                    break;
+                case 2:
+                    $condition = "purchasestatus";
+                    $condition2 = "purchase";
+                    break;
+                case 3:
+                    $condition = "transferstatus";
+                    $condition2 = "transfer";
+                    break;
+            }
+            $query = "UPDATE 
+                        {$this->table_name} a
+                    JOIN
+                        invoice b
+                    ON
+                        a.invoice_id = b.invoice_id
+                    SET
+                        a.{$condition} = ?,
+                        a.{$condition2} = ?
+                    WHERE b.workflow_id = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->amendstatus);
+            $stmt->bindParam(2, $this->amendstatus);
+
+            $stmt->bindParam(3, $this->invlineid);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public function getStatus() {
+            $toAmend = 0;
+            $toPurchase = 0;
+            $toTransfer = 0;
+
+            $toAmendCnt = 0;
+            $toPurchaseCnt = 0;
+            $toTranferCnt = 0;
+
+            $Astatus = 0;
+            $Pstatus = 0;
+            $Tstatus = 0;
+
+            $query = "SELECT * FROM {$this->table_name} WHERE invoice_id = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->invoice_id);
+
+            $stmt->execute();
+
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                extract($row);
+
+                if (+$amend != 0) {
+                    $toAmendCnt++;
+                }
+                if (+$purchase != 0) {
+                    $toPurchaseCnt++;
+                }
+                if (+$transfer != 0) {
+                    $toTranferCnt++;
+                }
+
+                if ($amendstatus > 0 && $amendstatus > $Astatus) {
+                    $Astatus = $amendstatus;
+                }
+                if ($purchasestatus > 0 && $purchasestatus > $Pstatus) {
+                    $Pstatus = $purchasestatus;
+                }
+                if ($transferstatus > 0 && $transferstatus > $Tstatus) {
+                    $Tstatus = $transferstatus;
+                }
+            }
+
+            if ($toAmendCnt > 0) {
+                $toAmend = 1;
+            }
+            if ($toPurchaseCnt > 0) {
+                $toPurchase = 1;
+            }
+            if ($toTranferCnt > 0) {
+                $toTransfer = 1;
+            }
+
+            return array(
+                'amend' => $toAmend,
+                'purchase' => $toPurchase,
+                'transfer' => $toTransfer,
+                'amendstatus' => $Astatus,
+                'purchasestatus' => $Pstatus,
+                'transferstatus' => $Tstatus,
+
+            );
         }
 
         public function getCat($row) {
@@ -691,6 +864,32 @@
                 }
 
                 return $productlist;
+            }
+        }
+
+        function updateList() {
+            $query = "UPDATE
+                        {$this->table_name}
+                    SET
+                        checked = ?,
+                        purchase = ?,
+                        transfer = ?,
+                        amend = ?
+                    WHERE invlineid = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->checked);
+            $stmt->bindParam(2, $this->purchase);
+            $stmt->bindParam(3, $this->transfer);
+            $stmt->bindParam(4, $this->amend);
+
+            $stmt->bindParam(5, $this->invlineid);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
             }
         }
 

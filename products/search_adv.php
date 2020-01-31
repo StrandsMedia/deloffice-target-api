@@ -43,35 +43,51 @@
                         'Description_1' => $des1,
                         'Description_2' => $des2,
                         'Description_3' => $des3,
-                        'PP' => $puprice, // Public Price
-                        'CP1' => $coprice, // Corporate Price 1
-                        'CP2' => $delcityprice, // Corporate Price 2
-                        'WP' => $wsprice, // Wholesale Price
-                        'TP' => $delcitypromo, // Tender Price
+                        'PP' => +$puprice, // Public Price
+                        'CP1' => +$coprice, // Corporate Price 1
+                        'CP2' => +$delcityprice, // Corporate Price 2
+                        'WP' => +$wsprice, // Wholesale Price
+                        'TP' => +$delcitypromo, // Tender Price
                     );
 
                     switch (+$priceDefault) {
                         case 1:
                             $prod_item['fExclPrice'] = +$puprice;
                             $prod_item['pricecat'] = 'PP';
+
+                            
                             break;
                         case 2:
                             $prod_item['fExclPrice'] = +$coprice;
                             $prod_item['pricecat'] = 'CP1';
+
+                            
                             break;
                         case 3:
                             $prod_item['fExclPrice'] = +$wsprice;
                             $prod_item['pricecat'] = 'WP';
+
+                           
                             break;
                         case 4:
                             $prod_item['fExclPrice'] = +$delcityprice;
                             $prod_item['pricecat'] = 'CP2';
+
+                            
                             break;
                         case 5:
                             $prod_item['fExclPrice'] = +$delcitypromo;
                             $prod_item['pricecat'] = 'TP';
+
+                           
                             break;
                     }
+
+                    $prod_item['prices']['CP1'] = +$coprice;
+                    $prod_item['prices']['PP'] = +$puprice;
+                    $prod_item['prices']['TP'] = +$delcitypromo;
+                    $prod_item['prices']['CP2'] = +$delcityprice;
+                    $prod_item['prices']['WP'] = +$wsprice;
 
                     if (isset($srvdb)) {
                         $stkitem = new StkItem($srvdb);
@@ -84,7 +100,7 @@
 
                         $prod_item['StockLink'] = $row2['StockLink'];
                         $prod_item['Qty_On_Hand'] = $row2['Qty_On_Hand'];
-                        $prod_item['AveUCst'] = $row2['AveUCst'];
+                        $prod_item['AveUCst'] = +$row2['AveUCst'];
 
                         $fetchtax = $taxrate->getTaxRate(1.4);
                         $prod_item['TaxRate'] = +$fetchtax['TaxRate'];

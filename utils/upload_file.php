@@ -20,7 +20,7 @@
     $ftp = new DelOfficeFTP('ftp.deloffice.mu', 'deloffice', 'WanLtd2018*');
     if ($ftp) {
         $localdir = "../../imgdir/";
-        $remotedir = "/public_html/images/img_large/";
+        $remotedir = "/public_html/home/images/img_large/";
 
         if (isset($_FILES['file'])) {
             if (!is_array($_FILES['file']['name'])) {
@@ -28,7 +28,7 @@
 
                 $remoteFile = $remotedir.$fileName;
                 $localFile = $localdir.$fileName;
-                $dir = '/public_html/images/img_large';
+                $dir = '/public_html/home/images/img_large';
 
                 //checking if file exsists
                 if (file_exists($localFile)) unlink($localFile);
@@ -54,10 +54,25 @@
                         ));
                     }
                 } else {
-                    http_response_code(503);
-                    echo json_encode(array(
-                        'message' => 'Unable to upload file at the moment.'
-                    ));
+                    $product->p_id = explode('.', $fileName)[0];
+                    if ($product->watsProduct() !== 'P') {
+                        if ($ftp->ftpCopyFile($remoteFile, $localFile, $dir)) {
+                            http_response_code(200);
+                            echo json_encode(array(
+                                'message' => $product->watsProduct() . 'File was uploaded successfully'
+                            ));
+                        } else {
+                            http_response_code(503);
+                            echo json_encode(array(
+                                'message' => 'Unable to upload file at the moment.'
+                            ));
+                        }
+                    } else {
+                        http_response_code(200);
+                        echo json_encode(array(
+                            'message' => 'File was uploaded successfully'
+                        ));
+                    }
                 }
             }
         } else {

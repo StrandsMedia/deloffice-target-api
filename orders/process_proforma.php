@@ -53,26 +53,30 @@
                     $invoice->InvStatus = 5;
                     $workflow->status = 26;
 
-                    if (isset($srvdb)) {
-                        if (isset($data->customerCode)) {
-                            $link = $data->DCLink;
-                            $term = $client->getTerms($data->customerCode);
+                    // if (isset($srvdb)) {
+                    //     if (isset($data->customerCode)) {
+                    //         $link = $data->DCLink;
+                    //         $term = $client->getTerms($data->customerCode);
 
-                            $postar->AccountLink = $link;
+                    //         $postar->AccountLink = $link;
 
-                            if ($postar->getOutstanding($term) > 0) {
-                                $invoice->InvStatus = 4;
-                                $workflow->status = 25;
-                            }
-                        } else {
-                            $invoice->InvStatus = 4;
-                            $workflow->status = 25;
-                        }
-                    }
+                    //         if ($postar->getOutstanding($term) > 0) {
+                    //             $invoice->InvStatus = 4;
+                    //             $workflow->status = 27;
+                    //         }
+                    //     } else {
+                    //         $invoice->InvStatus = 4;
+                    //         $workflow->status = 27;
+                    //     }
+                    // }
                     break;
                 case 'cancel':
                     $invoice->InvStatus = 3;
                     $workflow->status = 25;
+                    break;
+                case 'rollback':
+                    $invoice->InvStatus = 0;
+                    $workflow->status = 3;
                     break;
             }
 
@@ -94,7 +98,7 @@
                     $proforma->workflow_id = $data->workflow_id;
                     $proforma->user = $data->user;
                     $proforma->step = $invoice->InvStatus;
-                    $proforma->note = '';
+                    $proforma->note = isset($data->note) ? $data->note : '';
                     $proforma->comment = '';
     
                     if ($proforma->create()) {

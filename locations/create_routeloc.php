@@ -11,29 +11,28 @@
     $database = new Database();
     $db = $database->getConnection();
 
-    $route = new Route($db);
+    $routeloc = new RouteLocation($db);
 
     $data = json_decode(file_get_contents("php://input"));
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($data)) {
-            $route->routeRef = $route->getNextRef($data->routeRef);
-
-            $route->routeName = $data->routeName;
-
-            if ($route->create()) {
+            $routeloc->routeId = $data->routeId;
+            $routeloc->locationId = $data->locationId;
+            $routeloc->rank = $routeloc->getNextRank();
+            if ($routeloc->create()) {
                 http_response_code(201);
     
                 echo json_encode(array(
                     'status' => 'success',
-                    'message' => 'Route was successfully created'
+                    'message' => 'Location was successfully created'
                 ));
             } else {
                 http_response_code(503);
     
                 echo json_encode(array(
                     'status' => 'error',
-                    'message' => 'Unable to create route'
+                    'message' => 'Unable to create location'
                 ));
             }
         } else {
@@ -41,7 +40,7 @@
     
             echo json_encode(array(
                 'status' => 'error',
-                'message' => 'Unable to create route. No data was found.'
+                'message' => 'Unable to create location. No data was found.'
             ));
         }
     }

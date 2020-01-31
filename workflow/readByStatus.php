@@ -18,7 +18,7 @@
     $stmt = $workflow->readByStatus(1);
     $stmt_2 = $workflow->readByStatus(2);
     $stmt_3 = $workflow->readByStatus(3);
-    $num = $stmt->rowCount() + $stmt2->rowCount() + $stmt3->rowCount();
+    $num = $stmt->rowCount() + $stmt_2->rowCount() + $stmt_3->rowCount();
 
     if ($num > 0) {
         $workflow_arr = array();
@@ -51,7 +51,7 @@
             array_push($temp_array, $workflow_item);
         }
 
-        while ($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+        while ($row2 = $stmt_2->fetch(PDO::FETCH_ASSOC)) {
             extract($row2);
 
             $workflow_item2 = array(
@@ -76,7 +76,7 @@
             array_push($temp_array, $workflow_item2);
         }
 
-        while ($row3 = $stmt3->fetch(PDO::FETCH_ASSOC)) {
+        while ($row3 = $stmt_3->fetch(PDO::FETCH_ASSOC)) {
             extract($row3);
 
             $workflow_item3 = array(

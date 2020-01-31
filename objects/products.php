@@ -303,6 +303,45 @@
             return $string;
         }
 
+        public function getProductCodesAlt($cat, $cat2) {
+            $condition = "";
+
+            if (isset($cat2)) {
+                $condition = " AND category2 = ? ";
+            }
+
+            $query = "SELECT
+                        p_id
+                    FROM
+                        {$this->table_name}
+                    WHERE
+                        pf_cat_id = ?{$condition}";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $cat);
+            if (isset($cat2)) {
+                $stmt->bindParam(2, $cat2);
+            }
+
+            $stmt->execute();
+
+            $string = "(";
+            $i = 0;
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $i++;
+                extract($row);
+                $string = $string . "'{$p_id}'";
+                if ($i === $stmt->rowCount()) {
+                    $string = $string . ")";
+                } else {
+                    $string = $string . ",";
+                }
+            }
+
+            return $string;
+        }
+
         function getProdById() {
             $query = "SELECT
                         *
@@ -319,37 +358,62 @@
 
             return $stmt;
         }
+        function getProdByIdExt() {
+            $query = "SELECT
+                        *
+                    FROM
+                        {$this->table_name}
+                    WHERE
+                        p_id = ?
+                    LIMIT 0,1;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->p_id, PDO::PARAM_STR);
+
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row;
+        }
 
         function getProdByName($mode, $keywords) {
             $condition = "";
             if ($mode === 1) {
-                $condition = "visible = 'Y' OR visible = 'N'";
+                $condition = "a.visible = 'Y' OR a.visible = 'N'";
             } else {
-                $condition = "visible = 'P'";
+                $condition = "a.visible = 'P'";
             }
 
             $query = "SELECT
-                        p_id, des1, des2, des3, puprice, wsprice, coprice, avgcost, delcityprice, delcitypromo, visible, taxcode
+                        a.p_id, a.des1, a.des2, a.des3, a.puprice, a.wsprice, a.coprice, a.avgcost, a.delcityprice, a.delcitypromo, a.visible, a.taxcode
                     FROM
-                        {$this->table_name}
+                        {$this->table_name} a,
+                        (SELECT p_id, CONCAT(des1, '', des2, '', des3) as product_name FROM {$this->table_name}) b
                     WHERE
-                        ({$condition}) AND p_id LIKE ?
+                        a.p_id = b.p_id AND ({$condition}) AND a.p_id LIKE ?
                     OR
-                        ({$condition}) AND des1 LIKE ?
+                        a.p_id = b.p_id AND ({$condition}) AND a.des1 LIKE ?
                     OR
-                        ({$condition}) AND des2 LIKE ?
+                        a.p_id = b.p_id AND ({$condition}) AND a.des2 LIKE ?
                     OR
-                        ({$condition}) AND des3 LIKE ?;";
+                        a.p_id = b.p_id AND ({$condition}) AND a.des3 LIKE ?
+                    OR
+                        a.p_id = b.p_id AND ({$condition}) AND b.product_name LIKE ?;";
 
             $stmt = $this->conn->prepare($query);
 
             $keywords = htmlspecialchars(strip_tags($keywords));
+            $keywords = explode(" ", $keywords);
+            $keywords = implode("%", $keywords);
             $keywords = "%{$keywords}%";
 
             $stmt->bindParam(1, $keywords, PDO::PARAM_STR);
             $stmt->bindParam(2, $keywords, PDO::PARAM_STR);
             $stmt->bindParam(3, $keywords, PDO::PARAM_STR);
             $stmt->bindParam(4, $keywords, PDO::PARAM_STR);
+            $stmt->bindParam(5, $keywords, PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -390,28 +454,45 @@
         }
 
         function search($keywords) {
+            // $query = "SELECT
+            //             *
+            //         FROM
+            //             {$this->table_name}
+            //         WHERE
+            //             p_id LIKE ?
+            //         OR
+            //             des1 LIKE ?
+            //         OR
+            //             des2 LIKE ?
+            //         OR
+            //             des3 LIKE ?
+            //         LIMIT 10;";
             $query = "SELECT
-                        *
+                        a.*, b.product_name
                     FROM
-                        {$this->table_name}
+                        {$this->table_name} a,
+                        (SELECT p_id, CONCAT(des1, '', des2, '', des3) as product_name)
                     WHERE
-                        p_id LIKE ?
+                        (a.p_id = b.p_id 
+                    AND
+                        a.p_id LIKE ?)
                     OR
-                        des1 LIKE ?
-                    OR
-                        des2 LIKE ?
-                    OR
-                        des3 LIKE ?;";
+                        (a.p_id = b.p_id 
+                    AND
+                        b.product_name LIKE ?)
+                    LIMIT 20;";
 
             $stmt = $this->conn->prepare($query);
 
             $keywords = htmlspecialchars(strip_tags($keywords));
+            $stmt->bindParam(1, $keywords, PDO::PARAM_STR);
+            $keywords = explode(" ", $keywords);
+            $keywords = implode("%", $keywords);
             $keywords = "%{$keywords}%";
 
-            $stmt->bindParam(1, $keywords, PDO::PARAM_STR);
             $stmt->bindParam(2, $keywords, PDO::PARAM_STR);
-            $stmt->bindParam(3, $keywords, PDO::PARAM_STR);
-            $stmt->bindParam(4, $keywords, PDO::PARAM_STR);
+            // $stmt->bindParam(3, $keywords, PDO::PARAM_STR);
+            // $stmt->bindParam(4, $keywords, PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -439,6 +520,31 @@
             $stmt->execute();
 
             return $stmt;
+        }
+
+        function fetchOne($keywords) {
+            $query = "SELECT
+                        *
+                    FROM
+                        {$this->table_name}
+                    WHERE
+                        p_id LIKE ?
+                    ORDER BY
+                        p_id DESC
+                    LIMIT 0,1;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $keywords = htmlspecialchars(strip_tags($keywords));
+            $keywords = "%{$keywords}%";
+
+            $stmt->bindParam(1, $keywords, PDO::PARAM_STR);
+
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row;
         }
 
         function isProduct() {

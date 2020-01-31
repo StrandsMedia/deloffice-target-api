@@ -25,32 +25,115 @@
             switch (+$data->step) {
                 case 1:
                     // Create Proforma Invoice
-                    $invoice->company_name = $data->company_name;
-                    $invoice->user = $data->user;
-                    $invoice->customerCode = $data->customerCode;
-                    $invoice->workflow_id = $data->workflow_id;
-        
-                    $workflow->workflow_id = $data->workflow_id;
-                    $workflow->status = 25;
-        
-                    $proforma->workflow_id = $data->workflow_id;
-                    $proforma->user = $data->user;
-                    $proforma->step = 1;
-                    $proforma->note = '';
-                    $proforma->comment = '';
-                    
-                    if ($invoice->createProforma()) {
-                        $invoice->invoice_id = $db->lastInsertId();
-                        if ($invoice->updateInvRef()) {
-                            $workflow->invoice_id = $invoice->invoice_id;
-        
-                            if ($workflow->update(5)) {
-                                if ($proforma->create()) {
-                                    http_response_code(201);
-                                    echo json_encode($invoice->invoice_id);
+                    if (isset($data->workflow_id)) {
+                        $invoice->company_name = $data->company_name;
+                        $invoice->user = $data->user;
+                        $invoice->customerCode = $data->customerCode;
+                        $invoice->workflow_id = $data->workflow_id;
+            
+                        $workflow->workflow_id = $data->workflow_id;
+                        $workflow->status = 25;
+            
+                        $proforma->workflow_id = $data->workflow_id;
+                        $proforma->user = $data->user;
+                        $proforma->step = 1;
+                        $proforma->note = '';
+                        $proforma->comment = '';
+                        
+                        if ($invoice->createProforma()) {
+                            $invoice->invoice_id = $db->lastInsertId();
+                            if ($invoice->updateInvRef()) {
+                                $workflow->invoice_id = $invoice->invoice_id;
+            
+                                if ($workflow->update(5)) {
+                                    if ($proforma->create()) {
+                                        http_response_code(201);
+                                        echo json_encode($invoice->invoice_id);
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        $workflow->data = $data->data;
+                        $workflow->cust_id = $data->cust_id;
+                        $workflow->status = $data->status;
+
+                        $wf_id = $workflow->findWF();
+
+                        if (isset($wf_id)) {
+                            $invoice->company_name = $data->company_name;
+                            $invoice->user = $data->user;
+                            $invoice->customerCode = $data->customerCode;
+                            $invoice->workflow_id = $wf_id;
+                
+                            $workflow->workflow_id = $wf_id;
+                
+                            $proforma->workflow_id = $wf_id;
+                            $proforma->user = $data->user;
+                            $proforma->step = 1;
+                            $proforma->note = '';
+                            $proforma->comment = '';
+                            
+                            if ($invoice->createProforma()) {
+                                $invoice->invoice_id = $db->lastInsertId();
+                                if ($invoice->updateInvRef()) {
+                                    $workflow->invoice_id = $invoice->invoice_id;
+                
+                                    if ($workflow->update(5)) {
+                                        if ($workflow->status < 6) {
+                                            if ($proforma->create()) {
+                                                http_response_code(201);
+                                                echo json_encode(array(
+                                                    'invoice_id' => $invoice->invoice_id,
+                                                    'wf_id' => $wf_id,
+                                                    'message' => 'Workflow Entry created.'
+                                                ));
+                                            }
+                                        } else {
+                                            http_response_code(201);
+                                            echo json_encode(array(
+                                                'invoice_id' => $invoice->invoice_id,
+                                                'wf_id' => $wf_id,
+                                                'message' => 'Workflow Entry created.'
+                                            ));
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            if ($workflow->create(1)) {
+                                $invoice->company_name = $data->company_name;
+                                $invoice->user = $data->user;
+                                $invoice->customerCode = $data->customerCode;
+                                $invoice->workflow_id = $db->lastInsertId();
+                    
+                                $workflow->workflow_id = $db->lastInsertId();
+                                $workflow->status = 25;
+                    
+                                $proforma->workflow_id = $db->lastInsertId();
+                                $proforma->user = $data->user;
+                                $proforma->step = 1;
+                                $proforma->note = '';
+                                $proforma->comment = '';
+    
+                                if ($invoice->createProforma()) {
+                                    $invoice->invoice_id = $db->lastInsertId();
+                                    if ($invoice->updateInvRef()) {
+                                        $workflow->invoice_id = $invoice->invoice_id;
+                    
+                                        if ($proforma->create()) {
+                                            http_response_code(201);
+                                            echo json_encode(array(
+                                                'invoice_id' => $invoice->invoice_id,
+                                                'wf_id' => $wf_id
+                                            ));
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                        }
+
                     }
                     break;
                 case 2:
@@ -114,7 +197,7 @@
                 
                     $workflowhist->workflow_id = $data->workflow_id;
                     $workflowhist->user = $data->user;
-                    $workflowhist->step = $invoice->InvStatus;
+                    $workflowhist->step = $workflow->status;
                     $workflowhist->note = '';
                     $workflowhist->comment = '';
                 
@@ -133,6 +216,53 @@
                             'message' => 'Failed to update invoice.'
                         ));
                     }
+                    break;
+                case 5:
+                    // Starting Proforma
+                    
+                    $invoice->company_name = $data->company_name;
+                    $invoice->user = $data->user;
+                    $invoice->customerCode = $data->customerCode;
+                    $invoice->workflow_id = $data->workflow_id;
+                    $invoice->InvStatus = 1;
+        
+                    $workflow->workflow_id = $data->workflow_id;
+                    $workflow->status = 25;
+        
+                    $proforma->workflow_id = $data->workflow_id;
+                    $proforma->user = $data->user;
+                    $proforma->step = 1;
+                    $proforma->note = '';
+                    $proforma->comment = '';
+                    
+                    
+                    $invoice->invoice_id = $data->invoice_id;
+                    if ($invoice->updateInvRef()) {
+                        if ($invoice->updateInvStatus()) {
+                            $workflow->invoice_id = $invoice->invoice_id;
+        
+                            if ($workflow->update(5)) {
+                                if ($workflow->status < 6) {
+                                    if ($proforma->create()) {
+                                        http_response_code(201);
+                                        echo json_encode(array(
+                                            'invoice_id' => $invoice->invoice_id,
+                                            'wf_id' => $data->workflow_id,
+                                            'message' => 'Workflow Entry created.'
+                                        ));
+                                    }
+                                } else {
+                                    http_response_code(201);
+                                    echo json_encode(array(
+                                        'invoice_id' => $invoice->invoice_id,
+                                        'wf_id' => $data->workflow_id,
+                                        'message' => 'Workflow Entry created.'
+                                    ));
+                                }
+                            }
+                        }
+                    }
+
                     break;
             }
         } else {

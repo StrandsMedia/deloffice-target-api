@@ -110,6 +110,8 @@
         function read($keywords) {
             if (isset($keywords)) {
                 $keywords = htmlspecialchars(strip_tags($keywords));
+                $keywords = explode(" ", $keywords);
+                $keywords = implode("%", $keywords);
                 $keywords = "'%{$keywords}%'";
                 $keywords = " WHERE company_name LIKE " . $keywords . " OR customerCode LIKE " . $keywords . "";
             }
@@ -190,6 +192,8 @@
             $stmt = $this->conn->prepare($query);
 
             $keywords = htmlspecialchars(strip_tags($keywords));
+            $keywords = explode(" ", $keywords);
+            $keywords = implode("%", $keywords);
             $keywords = "%{$keywords}%";
 
             $stmt->bindParam(1, $keywords);
@@ -206,9 +210,33 @@
             $stmt = $this->conn->prepare($query);
 
             $keywords = htmlspecialchars(strip_tags($keywords));
+            $keywords = explode(" ", $keywords);
+            $keywords = implode("%", $keywords);
             $keywords = "%{$keywords}%";
 
             $stmt->bindParam(1, $keywords);
+
+            $stmt->execute();
+
+            return $stmt;
+        }
+
+        function findBySector() {
+            $condition = "";
+
+            if (isset($this->subsector)) {
+                $condition = " subsector = ? AND ";
+            }
+
+            $query = "SELECT * FROM {$this->table_name} WHERE sector = ? AND {$condition} customerCode != '' ORDER BY company_name ASC;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->sector);
+
+            if (isset($this->subsector)) {
+                $stmt->bindParam(2, $this->subsector);
+            }
 
             $stmt->execute();
 

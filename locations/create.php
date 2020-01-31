@@ -17,7 +17,7 @@
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($data)) {
-            $location->locationRef = $data->locationRef;
+            $location->locationRef = $location->getNextRef($data->locationRef);
             $location->locationName = $data->locationName;
 
             if ($location->create()) {

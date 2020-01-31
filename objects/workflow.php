@@ -19,6 +19,10 @@
         public $range1;
         public $range2;
         public $data;
+        public $creditCtrl;
+        public $tableId;
+        public $createdAt;
+        public $updatedAt;
 
         public function __construct($db) {
             $this->conn = $db;
@@ -38,6 +42,16 @@
 
         //     }
         // }
+
+        function getData() {
+            $query = "SELECT invoiceNo FROM {$this->table_name} a WHERE a.invoiceNo LIKE '%INV%' AND (DATE(a.time) BETWEEN DATE('2018-06-01') AND DATE(NOW())) LIMIT 0, 1;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->execute();
+
+            return $stmt;
+        }
 
         // Create
         
@@ -59,6 +73,25 @@
                                 status = :status,
                                 cust_id = :cust_id,
                                 orderNo = :orderNo;";
+                case 2:
+                    $query = "INSERT INTO
+                                {$this->table_name}
+                            SET
+                                data = :data,
+                                status = :status,
+                                cust_id = :cust_id,
+                                orderNo = :orderNo,
+                                creditCtrl = :creditCtrl;";
+                    break;
+                case 3:
+                    $query = "INSERT INTO
+                                {$this->table_name}
+                            SET
+                                data = :data,
+                                status = :status,
+                                cust_id = :cust_id,
+                                creditCtrl = :creditCtrl;";
+                    break;
             }
 
             $stmt = $this->conn->prepare($query);
@@ -67,8 +100,12 @@
             $stmt->bindParam(':cust_id', $this->cust_id, PDO::PARAM_INT);
             $stmt->bindParam(':data', $this->data, PDO::PARAM_INT);
 
-            if ($num === 1) {
+            if ($num === 1 || $num == 2) {
                 $stmt->bindParam(':orderNo', $this->orderNo, PDO::PARAM_STR);
+            }
+
+            if ($num === 2 || $num === 3) {
+                $stmt->bindParam(':creditCtrl', $this->creditCtrl, PDO::PARAM_INT);
             }
             
             if ($stmt->execute()) {
@@ -101,7 +138,7 @@
             }
             switch (+$case) {
                 case 1:
-                    $condition = " AND a.status BETWEEN 1 AND 3 ";
+                    $condition = " AND a.status IN (1, 2, 3, 27) ";
                     break;
                 case 2:
                     $condition = " AND a.status IN (3, 25, 26) ";
@@ -116,13 +153,42 @@
                     $condition = " AND a.status IN (6, 9, 8) ";
                     break;
             }
-            $query = "SELECT b.cust_id, b.company_name, a.workflow_id, a.time, a.status, a.urgent, a.cust_id, a.orderNo, a.purchase, a.invoiceNo, a.vehicleNo, a.sessionID, b.customerCode, a.invoice_id FROM {$this->table_name} a, {$table} b WHERE b.cust_id = a.cust_id AND a.status <> 0 {$condition}{$condition2} ORDER BY a.time DESC";
+            $query = "SELECT b.cust_id, b.company_name, a.workflow_id, a.time, a.status, a.urgent, a.cust_id, a.orderNo, a.purchase, a.invoiceNo, a.vehicleNo, a.sessionID, b.customerCode, a.invoice_id, a.creditCtrl FROM {$this->table_name} a, {$table} b WHERE b.cust_id = a.cust_id AND a.status <> 0 {$condition}{$condition2} ORDER BY a.time DESC";
 
             $stmt = $this->conn->prepare($query);
 
             $stmt->execute();
 
             return $stmt;
+        }
+
+        function creditCtrl() {
+            $query = "SELECT a.*, b.step FROM {$this->table_name} a, workflow_steps b WHERE a.status = b.step_id AND a.creditCtrl = 1 ORDER BY a.workflow_id, a.status DESC;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->execute();
+
+            return $stmt;
+        }
+
+        function findWF() {
+            $query = "SELECT * FROM {$this->table_name} WHERE `cust_id` = ? AND `data` = ? AND DATE(`time`) = DATE(NOW()) ORDER BY `workflow_id` DESC LIMIT 0,1;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->cust_id);
+            $stmt->bindParam(2, $this->data);
+
+            $stmt->execute();
+
+            if ($stmt->rowCount()) {
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+                return $row['workflow_id'];
+            } else {
+                return null;
+            }
         }
 
         // Workflow Event
@@ -297,12 +363,17 @@
                     $table = 'pnp_cust';
                     break;
             }
+
+            $this->status = "(" . $this->status . ")";
+
+            if ($this->status == 0 || $this->status == 14) {
+                $this->status = "(0, 14)";
+            }
             
-            $query = "SELECT a.company_name, b.*, c.purchase as purchaseIns FROM {$table} a, {$this->table_name} b, workflow_delivery c WHERE a.cust_id = b.cust_id AND b.workflow_id = c.workflow_id AND b.status = ? ORDER BY b.workflow_id DESC LIMIT 50;";
+            $query = "SELECT a.company_name, b.*, c.purchase as purchaseIns FROM {$table} a, {$this->table_name} b, workflow_delivery c WHERE a.cust_id = b.cust_id AND b.workflow_id = c.workflow_id AND b.status IN {$this->status} ORDER BY b.workflow_id DESC LIMIT 50;";
 
             $stmt = $this->conn->prepare($query);
 
-            $stmt->bindParam(1, $this->status);
 
             $stmt->execute();
 
@@ -419,6 +490,33 @@
 
             return $stmt;
         }
+        
+        function getStatus() {
+            $query = "SELECT `status` FROM {$this->table_name} WHERE workflow_id = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->workflow_id);
+
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row['status'];
+        }
+        function getCreditCtrlStatus() {
+            $query = "SELECT `creditCtrl` FROM {$this->table_name} WHERE workflow_id = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->workflow_id);
+
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row['creditCtrl'];
+        }
 
         function update($num) {
             $condition = "";
@@ -441,6 +539,12 @@
                     break;
                 case 5:
                     $condition = ", invoice_id = :invoice_id ";
+                    break;
+                case 6:
+                    $condition = ", creditCtrl = :creditCtrl ";
+                    break;
+                case 7:
+                    $condition = ", orderNo = :orderNo, creditCtrl = :creditCtrl ";
                     break;
             }
 
@@ -473,6 +577,13 @@
                     case 5:
                         $stmt->bindParam(':invoice_id', $this->invoice_id);
                         break;
+                    case 6:
+                        $stmt->bindParam(':creditCtrl', $this->creditCtrl);
+                        break;
+                    case 7:
+                        $stmt->bindParam(':orderNo', $this->orderNo);
+                        $stmt->bindParam(':creditCtrl', $this->creditCtrl);
+                        break;
                 }
 
             $stmt->bindParam(':stat', $this->status);
@@ -483,6 +594,26 @@
             }
 
             return false;
+        }
+
+        function updateOnTableSession() {
+            $query = "UPDATE
+                        {$this->table_name}
+                    SET
+                        tableId = ?
+                    WHERE
+                        workflow_id = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $this->tableId);
+            $stmt->bindParam(2, $this->workflow_id);
+
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
         function updateOnSession() {
@@ -1238,14 +1369,23 @@
             $this->conn = $db;
         }
 
-        function readCount($status, $user) {
-            $query = "SELECT * FROM {$this->table_name} WHERE user = '{$user}' AND DATE(time) BETWEEN DATE('{$this->date1}') AND DATE('{$this->date2}') AND step = '{$status}';";
+        function readCount($user) {
+            // $query = "SELECT * FROM {$this->table_name} WHERE user = '{$user}' AND DATE(time) BETWEEN DATE('{$this->date1}') AND DATE('{$this->date2}') AND step = '{$status}';";
+            $query = "SELECT * FROM
+            (SELECT COUNT(*) as inquiry FROM {$this->table_name} WHERE user = '{$user}' AND DATE(time) BETWEEN DATE('{$this->date1}') AND DATE('{$this->date2}') AND step IN (1)) a,
+            (SELECT COUNT(*) as `quote` FROM {$this->table_name} WHERE user = '{$user}' AND DATE(time) BETWEEN DATE('{$this->date1}') AND DATE('{$this->date2}') AND step IN (2)) b,
+            (SELECT COUNT(*) as `order` FROM {$this->table_name} WHERE user = '{$user}' AND DATE(time) BETWEEN DATE('{$this->date1}') AND DATE('{$this->date2}') AND step IN (3)) c,
+            (SELECT COUNT(*) as purchase FROM {$this->table_name} WHERE user = '{$user}' AND DATE(time) BETWEEN DATE('{$this->date1}') AND DATE('{$this->date2}') AND step IN (4)) d,
+            (SELECT COUNT(*) as invoicing FROM {$this->table_name} WHERE user = '{$user}' AND DATE(time) BETWEEN DATE('{$this->date1}') AND DATE('{$this->date2}') AND step IN (5)) e,
+            (SELECT COUNT(*) as invoiced FROM {$this->table_name} WHERE user = '{$user}' AND DATE(time) BETWEEN DATE('{$this->date1}') AND DATE('{$this->date2}') AND step IN (6)) f;";
 
             $stmt = $this->conn->prepare($query);
 
             $stmt->execute();
 
-            return $stmt;
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row;
         }
 
         function readHistory($id) {
@@ -1726,6 +1866,34 @@
             } else {
                 return false;
             }
+        }
+
+        function readProducts($invoiceNo) {
+            $data_arr = array();
+            
+            $query = "SELECT * FROM {$this->table_name} a, workflow b WHERE a.workflow_id = b.workflow_id AND b.invoiceNo = ?;";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(1, $invoiceNo, PDO::PARAM_STR);
+
+            $stmt->execute();
+
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                extract($row);
+
+                // if ($this->inArray($product)) {
+                    $prod_item = array(
+                        'qty' => $qty,
+                        'format' => $format,
+                        'brand' => $brand,
+                        'product' => $product
+                    );
+                    array_push($data_arr, $prod_item);
+                // }
+            }
+
+            return $data_arr;
         }
 
         function insert($data) {

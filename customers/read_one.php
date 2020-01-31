@@ -11,7 +11,7 @@
     $database = new Database();
     $db = $database->getConnection();
 
-    $data = isset($_GET['d']) ? $_GET['d'] : die();
+    $data = isset($_GET['d']) ? $_GET['d'] : 1;
 
     switch (+$data) {
         case 1:

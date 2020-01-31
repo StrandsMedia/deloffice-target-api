@@ -81,12 +81,15 @@
                 switch ($_GET['d']) {
                     case '1':
                         $customer_item['company'] = 'DEL';
+                        $customer_item['data'] = 1;
                         break;
                     case '2':
                         $customer_item['company'] = 'RNS';
+                        $customer_item['data'] = 2;
                         break;
                     case '3':
                         $customer_item['company'] = 'PNP';
+                        $customer_item['data'] = 3;
                         break;
                 }
 

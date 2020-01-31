@@ -49,26 +49,21 @@
             );
 
             if (isset($history->date1) && isset($history->date2)) {
-                $inquiry = $history->readCount(1, $sales_id);
-                $quote = $history->readCount(2, $sales_id);
-                $order = $history->readCount(3, $sales_id);
-                $purchase = $history->readCount(4, $sales_id);
-                $invoicing = $history->readCount(5, $sales_id);
-                $invoiced = $history->readCount(6, $sales_id);
+                $data = $history->readCount($sales_id);
 
-                $user_item['inquiry'] = $inquiry->rowCount();
-                $user_item['quote'] = $quote->rowCount();
-                $user_item['order'] = $order->rowCount();
-                $user_item['purchase'] = $purchase->rowCount();
-                $user_item['invoicing'] = $invoicing->rowCount();
-                $user_item['invoiced'] = $invoiced->rowCount();
+                $user_item['inquiry'] = $data['inquiry'];
+                $user_item['quote'] = $data['quote'];
+                $user_item['order'] = $data['order'];
+                $user_item['purchase'] = $data['purchase'];
+                $user_item['invoicing'] = $data['invoicing'];
+                $user_item['invoiced'] = $data['invoiced'];
 
-                $inquirytotal += $inquiry->rowCount();
-                $quotetotal += $quote->rowCount();
-                $ordertotal += $order->rowCount();
-                $purchasetotal += $purchase->rowCount();
-                $invoicingtotal += $invoicing->rowCount();
-                $invoicedtotal += $invoiced->rowCount();
+                $inquirytotal += +$data['inquiry'];
+                $quotetotal += +$data['quote'];
+                $ordertotal += +$data['order'];
+                $purchasetotal += +$data['purchase'];
+                $invoicingtotal += +$data['invoicing'];
+                $invoicedtotal += +$data['invoiced'];
             }
 
             if (isset($comment->date0) && isset($comment->date1)) {

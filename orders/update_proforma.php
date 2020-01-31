@@ -89,11 +89,25 @@ error_reporting(E_ALL);
                 }
 
                 if (sizeof($data->entries) == $count) {
-                    http_response_code(200);
-                    echo json_encode(array(
-                        'status' => 'success',
-                        'message' => 'Proforma invoice updated successfully.'
-                    ));
+                    if ($data->status == 26 && $data->InvStatus == 6) {
+                        if ($invoice->changeAmendStatus(2)) {
+                            $invlines->invlineid = $data->workflow_id;
+                            $invlines->amendstatus = 0;
+                            if ($invlines->updateStatusAll(1)) {
+                                http_response_code(200);
+                                echo json_encode(array(
+                                    'status' => 'success',
+                                    'message' => 'Proforma invoice amended successfully.'
+                                ));
+                            }
+                        }
+                    } else {
+                        http_response_code(200);
+                        echo json_encode(array(
+                            'status' => 'success',
+                            'message' => 'Proforma invoice updated successfully.'
+                        ));
+                    }
                 } else {
                     http_response_code(200);
                     echo json_encode(array(
